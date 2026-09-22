@@ -1,0 +1,13 @@
+[package]
+name = "hv-asr"
+version.workspace = true
+edition.workspace = true
+
+[features]
+default = []
+sherpa = ["dep:sherpa-onnx"]
+
+[dependencies]
+hv-audio = { path = "../hv-audio" }
+thiserror = { workspace = true }
+sherpa-onnx = { version = "1.13.6", optional = true }

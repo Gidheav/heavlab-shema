@@ -1,0 +1,244 @@
+bible
+scripture
+testament
+gospel
+epistle
+psalm
+proverb
+prophet
+chapter
+verse
+lord
+god
+jesus
+christ
+holy
+spirit
+genesis
+first genesis
+second genesis
+third genesis
+exodus
+first exodus
+second exodus
+third exodus
+leviticus
+first leviticus
+second leviticus
+third leviticus
+numbers
+first numbers
+second numbers
+third numbers
+deuteronomy
+first deuteronomy
+second deuteronomy
+third deuteronomy
+joshua
+first joshua
+second joshua
+third joshua
+judges
+first judges
+second judges
+third judges
+ruth
+first ruth
+second ruth
+third ruth
+samuel
+first samuel
+second samuel
+third samuel
+kings
+first kings
+second kings
+third kings
+chronicles
+first chronicles
+second chronicles
+third chronicles
+ezra
+first ezra
+second ezra
+third ezra
+nehemiah
+first nehemiah
+second nehemiah
+third nehemiah
+esther
+first esther
+second esther
+third esther
+job
+first job
+second job
+third job
+psalms
+first psalms
+second psalms
+third psalms
+proverbs
+first proverbs
+second proverbs
+third proverbs
+ecclesiastes
+first ecclesiastes
+second ecclesiastes
+third ecclesiastes
+song of solomon
+first song of solomon
+second song of solomon
+third song of solomon
+isaiah
+first isaiah
+second isaiah
+third isaiah
+jeremiah
+first jeremiah
+second jeremiah
+third jeremiah
+lamentations
+first lamentations
+second lamentations
+third lamentations
+ezekiel
+first ezekiel
+second ezekiel
+third ezekiel
+daniel
+first daniel
+second daniel
+third daniel
+hosea
+first hosea
+second hosea
+third hosea
+joel
+first joel
+second joel
+third joel
+amos
+first amos
+second amos
+third amos
+obadiah
+first obadiah
+second obadiah
+third obadiah
+jonah
+first jonah
+second jonah
+third jonah
+micah
+first micah
+second micah
+third micah
+nahum
+first nahum
+second nahum
+third nahum
+habakkuk
+first habakkuk
+second habakkuk
+third habakkuk
+zephaniah
+first zephaniah
+second zephaniah
+third zephaniah
+haggai
+first haggai
+second haggai
+third haggai
+zechariah
+first zechariah
+second zechariah
+third zechariah
+malachi
+first malachi
+second malachi
+third malachi
+matthew
+first matthew
+second matthew
+third matthew
+mark
+first mark
+second mark
+third mark
+luke
+first luke
+second luke
+third luke
+john
+first john
+second john
+third john
+acts
+first acts
+second acts
+third acts
+romans
+first romans
+second romans
+third romans
+corinthians
+first corinthians
+second corinthians
+third corinthians
+galatians
+first galatians
+second galatians
+third galatians
+ephesians
+first ephesians
+second ephesians
+third ephesians
+philippians
+first philippians
+second philippians
+third philippians
+colossians
+first colossians
+second colossians
+third colossians
+thessalonians
+first thessalonians
+second thessalonians
+third thessalonians
+timothy
+first timothy
+second timothy
+third timothy
+titus
+first titus
+second titus
+third titus
+philemon
+first philemon
+second philemon
+third philemon
+hebrews
+first hebrews
+second hebrews
+third hebrews
+james
+first james
+second james
+third james
+peter
+first peter
+second peter
+third peter
+john
+first john
+second john
+third john
+jude
+first jude
+second jude
+third jude
+revelation
+first revelation
+second revelation
+third revelation

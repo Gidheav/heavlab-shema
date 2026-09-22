@@ -1,0 +1,17 @@
+[package]
+name = "bible-ffi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "UniFFI boundary — the only crate with FFI macros. Public surface for mobile shells."
+
+[dependencies]
+bible-core = { path = "../bible-core" }
+bible-asr = { path = "../bible-asr" }
+thiserror = { workspace = true }
+uniffi = { version = "0.29", features = ["cli"] }
+
+[lib]
+crate-type = ["lib", "cdylib"]
+name = "bible_ffi"

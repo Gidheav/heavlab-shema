@@ -1,0 +1,12 @@
+namespace bible_ffi;
+
+dictionary VerseRef {
+    u8 book;
+    u16 chapter;
+    u16 verse;
+};
+
+interface BibleEngine {
+    constructor() -> BibleEngine;
+    string version();
+}

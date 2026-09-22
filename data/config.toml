@@ -1,0 +1,30 @@
+audio_device = "Microphone Array (Realtek(R) Audio)"
+gain = 20.0
+translation = "KJV"
+window_width = 1536.0
+window_height = 816.0
+dark_mode = true
+asr_mode = "sherpa"
+asr_model_size = "medium"
+vad_mode = "hybrid"
+vad_sensitivity = 0.5
+noise_gate_enabled = true
+noise_gate_threshold = 0.004999999888241291
+hpf_enabled = true
+hpf_frequency = 80.0
+compressor_enabled = true
+compressor_ratio = 4.0
+use_gpu = false
+num_threads = 4
+hotwords_enabled = true
+beam_size = 4
+calibration_done = false
+
+[layoutState]
+leftCollapsed = false
+leftWidth = 316.8000183105469
+rightCollapsed = false
+rightWidth = 355.199951171875
+middleBottomCollapsed = false
+middleBottomHeight = 192.79995727539063
+ribbonCollapsed = false

@@ -1,0 +1,28 @@
+[package]
+name = "bible-datagen"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Build-time tool for generating Bible data packs. Never shipped in the app."
+
+[[bin]]
+name = "bible-datagen"
+path = "src/main.rs"
+
+[dependencies]
+bible-core = { path = "../bible-core" }
+serde = { workspace = true }
+serde_json = "1"
+toml = "0.8"
+rkyv = { workspace = true }
+blake3 = { workspace = true }
+clap = { version = "4", features = ["derive"] }
+anyhow = "1"
+ureq = "2"
+tar = "0.4.46"
+bzip2 = "0.5.2"
+
+[dev-dependencies]
+rkyv = { workspace = true }
+blake3 = { workspace = true }

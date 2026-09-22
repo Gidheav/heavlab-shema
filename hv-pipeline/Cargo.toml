@@ -1,0 +1,13 @@
+[package]
+name = "hv-pipeline"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+hv-audio = { path = "../hv-audio", features = ["desktop"] }
+hv-vad = { path = "../hv-vad" }
+hv-asr = { path = "../hv-asr", features = ["sherpa"] }
+bible-core = { path = "../bible-core" }
+crossbeam-channel = { workspace = true }
+thiserror = { workspace = true }
+tracing = "0.1"

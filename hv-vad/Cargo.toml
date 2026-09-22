@@ -1,0 +1,8 @@
+[package]
+name = "hv-vad"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+hv-audio = { path = "../hv-audio" }
+thiserror = { workspace = true }

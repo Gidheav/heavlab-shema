@@ -1,0 +1,14 @@
+[package]
+name = "hv-audio"
+version.workspace = true
+edition.workspace = true
+
+[features]
+default = []
+desktop = ["dep:cpal"]
+asio = ["cpal/asio"]
+
+[dependencies]
+crossbeam-channel = { workspace = true }
+thiserror = { workspace = true }
+cpal = { version = "0.15", optional = true }

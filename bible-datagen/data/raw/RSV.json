@@ -1,0 +1,244 @@
+{
+    "translation":  "RSV: Revised Standard Version",
+    "books":  [
+                  {
+                      "name":  "1",
+                      "chapters":  [
+                                       {
+                                           "chapter":  "1",
+                                           "verses":  [
+                                                          {
+                                                              "verse":  "1",
+                                                              "text":  "En El Principio, Dios hizo los cielos y el suelo.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "2",
+                                                              "text":  "El suelo estaba vacío y oscuro, y el Espíritu de Dios cernían sobre la faz de las aguas.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "3",
+                                                              "text":  "Dios mandó: ``Que haya luz\u0027\u0027, y hubo luz.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "4",
+                                                              "text":  "Dios miró la luz y estaba feliz con lo que vio, luego separaron la luz y la oscuridad.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "5",
+                                                              "text":  "Dios llamó a la luz Día y a la oscuridad Noche. La tarde y la mañana marcaron el paso del primer día.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "6",
+                                                              "text":  "Entonces Dios mandó que se creara una división entre las aguas, separándolas unas de otras.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "7",
+                                                              "text":  "Dios dividió las aguas de abajo de las aguas de arriba.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "8",
+                                                              "text":  "Dios llamó al espacio Cielo. Luego vino la tarde y la mañana, terminando el segundo día.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "9",
+                                                              "text":  "Dios mandó ``Que las aguas bajo los cielos se reunieran como una sola, y que se revele el suelo\u0027\u0027, y así fue.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "10",
+                                                              "text":  "Dios llamó al suelo Tierra y a las aguas que se habían reunido Mares, y Dios estaba feliz con lo que vio.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "11",
+                                                              "text":  "Entonces Dios mandó: ``Que la tierra produzca hierba, plantas que lleven semillas, y árboles que dan fruta con semillas\u0027\u0027, y así fue.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "12",
+                                                              "text":  "La hierba y las plantas de varios tipos fueron creadas por la tierra, cada una con semillas, y árboles que dan fruta con semillas, y Dios estaba feliz con lo que vio.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "13",
+                                                              "text":  "Entonces vino la tarde y la mañana, terminando el tercer día.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "14",
+                                                              "text":  "Entonces Dios mandó: ``Que se coloquen luces en el cielo para separar el día de la noche. Servirán como señales para el paso del tiempo y para las estaciones,\r"
+                                                          },
+                                                          {
+                                                              "verse":  "15",
+                                                              "text":  "y que sus luces brillen en el cielo para iluminar la tierra\u0027\u0027, y así fue.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "16",
+                                                              "text":  "Dios creó dos cuerpos luminosos, el más grande para presidir el día y el más pequeño para la noche junto a las estrellas.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "17",
+                                                              "text":  "Dios los colocó en los cielos para iluminar la tierra, para tener dominio sobre el día y la noche,\r"
+                                                          },
+                                                          {
+                                                              "verse":  "18",
+                                                              "text":  "y separar la luz de la oscuridad. Dios estaba feliz con lo que vio.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "19",
+                                                              "text":  "Entonces vino la tarde y la mañana, terminando el cuarto día.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "20",
+                                                              "text":  "Dios mandó: ``Que las aguas se llenen de vida, y que los aves vuelen en el cielo sobre la tierra\u0027\u0027, y así fue.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "21",
+                                                              "text":  "Dios hizo todo los peces que mueven a través del agua, y cada tipo de aves, y Dios estaba feliz con lo que vio.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "22",
+                                                              "text":  "Dios los bendijo, diciendo: ``Que seas fértil y multiplícate, llena los océanos con vida y multiplica los aves en la tierra\u0027\u0027.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "23",
+                                                              "text":  "Entonces vino la tarde y la mañana, terminando el quinto día.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "24",
+                                                              "text":  "Entonces Dios mandó: ``Que la tierra produzca seres vivientes de todas clases- ganados, criaturas que se arrastran, y bestias salvajes\u0027\u0027, y así fue.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "25",
+                                                              "text":  "Entonces Dios creó los ganados y todas las criaturas que se arrastran, y las bestias salvajes, y Dios estaba feliz con lo que vio.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "26",
+                                                              "text":  "Entonces Dios mandó: ``Que caminen por la tierra personas creadas a nuestra imagen, y dales autoridad sobre todos los peces que mueven a través del agua, y sobre toda clase de aves, todos los ganados y todas las criaturas que se arrastran, y las bestias salvajes\u0027\u0027.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "27",
+                                                              "text":  "Entonces Dios creó a la gente en su reflejo, a imagen de Dios; hombre y mujer, Dios los creó.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "28",
+                                                              "text":  "Dios bendijo al pueblo y dijo ``Que seas fértil y multiplícate, y cuida la tierra, y todos los peces que mueven a través del agua, y cada tipo de aves, y los ganados, y todas las criaturas que se arrastran, y las bestias salvajes\u0027\u0027.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "29",
+                                                              "text":  "Entonces Dios dijo: ``He proporcionado toda la hierba, plantas que lleven semillas y árboles que dan fruta con semillas, que puedes usar como alimento,\r"
+                                                          },
+                                                          {
+                                                              "verse":  "30",
+                                                              "text":  "y todos los peces que mueven a través del agua, y toda clase de aves, todos los ganados, y todas las criaturas que se arrastran, y las bestias salvajes tambien\u0027\u0027.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "31",
+                                                              "text":  "Entonces Dios miró todo lo que había creado y estaba feliz con lo que vio. Luego vino la tarde y la mañana, terminando el sexto día.\r"
+                                                          }
+                                                      ]
+                                       },
+                                       {
+                                           "chapter":  "2",
+                                           "verses":  [
+                                                          {
+                                                              "verse":  "1",
+                                                              "text":  "La creación de todos los elementos del cielo y de la tierra se completó, y de todo lo que hay en ellos.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "2",
+                                                              "text":  "El séptimo día, Dios había terminado de trabajar y descansó.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "3",
+                                                              "text":  "Dios otorgó una bendición al séptimo día y lo declaró santo, porque en ese día, Dios descansó del trabajo de la creación.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "4",
+                                                              "text":  "Esta es la historia de la creación de los cielos y la tierra. Los días en que Dios hizo los cielos y la tierra.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "5",
+                                                              "text":  "Dios aún no había traído lluvia a la tierra, ya no había nadie para cuidar el suelo.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "6",
+                                                              "text":  "Una neblina se levantó del suelo y humedeció la superficie de la tierra.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "7",
+                                                              "text":  "Entonces Dios formó a Adán con el polvo de la tierra y sopló el aliento de vida en sus narices, creando así un ser vivo.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "8",
+                                                              "text":  "Dios plantó un hermoso jardín en Edén, al oriente, y colocó allí a Adán. Dios creció todo tipo de árboles en el Jardín. Eran agradables a la vista y su fruto era nutritivo.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "9",
+                                                              "text":  "En el centro del jardín habían dos árboles: El Árbol de la Vida y El Árbol del Conocimiento del Bien y del Mal.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "10",
+                                                              "text":  "Un río fluía a través de Edén proporcionando agua para el jardín, que se dividió en cuatro ramas.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "11",
+                                                              "text":  "Pishon fue el primer de los ríos, y rodeaba todo el país de Havilah, un lugar abundante en oro. El oro encontrado en esa tierra era de calidad excepcional, al igual que las piedras de bdellium y ónice.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "12",
+                                                              "text":  "Gihon fue el segundo río; rodeó toda la región de Cush.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "13",
+                                                              "text":  "El tercer río se llamaba el Tigris, que fluía al este de Asiria.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "14",
+                                                              "text":  "El cuarto río fue el Éufrates.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "15",
+                                                              "text":  "Entonces Dios colocó a Adán en el Jardín del Edén para cuidarlo y atenderlo.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "16",
+                                                              "text":  "Dios le instruyó a Adán, diciendo: \"Puedes comer de cualquier árbol del jardín, pero no comas el fruto del Árbol del Conocimiento del Bien y del Mal, porque si lo haces, ciertamente perecerás\".\r"
+                                                          },
+                                                          {
+                                                              "verse":  "17",
+                                                              "text":  "Dios dijo: \"No es bueno que el hombre esté solo, así que les ayudaré a encontrar un compañero\".\r"
+                                                          },
+                                                          {
+                                                              "verse":  "18",
+                                                              "text":  "De la tierra, Dios trajo todos los peces que mueven a través del agua, y toda clase de aves, todos los ganados, y todas las criaturas que se arrastran, y las bestias salvajes tambien.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "19",
+                                                              "text":  "Entonces les presentó a Adán para que los nombrara. Cualquier cosa que Adán llamó a cada criatura viviente, ese fue su nombre.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "20",
+                                                              "text":  "Adam nombró todos los peces que mueven a través del agua, y toda clase de aves, todos los ganados, y todas las criaturas que se arrastran, y las bestias salvajes tambien, pero Adam no pudo encontrar a su compañero.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "21",
+                                                              "text":  "Dios hizo que Adán cayera en un profundo sueño, y él se quedó dormido. Luego removió una de las costillas de Adán y selló la herida.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "22",
+                                                              "text":  "Entonces Dios creó a Eva con la costilla que había tomado de Adán y se la presentó.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "23",
+                                                              "text":  "Adam había encontrado a su compañera. \"Ella es parte de mí, mi igual; se llamará: mujer.\"\r"
+                                                          },
+                                                          {
+                                                              "verse":  "24",
+                                                              "text":  "Sus hijos dejarían a sus padres y se dedicarían a su esposa, convirtiéndose en uno.\r"
+                                                          },
+                                                          {
+                                                              "verse":  "25",
+                                                              "text":  "Adam y Eva estaban desnudos, pero se sentían cómodos en presencia del otro."
+                                                          }
+                                                      ]
+                                       }
+                                   ]
+                  }
+              ]
+}

@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 6b9c3bfc80a8de94706e8c2742ef2de765e0ae27c420705f3cd2b44410f7b5a9 # shrinks to (reference, expected_book, expected_chapter, expected_verse) = ("Song of Solomon 1:1", BookId(22), 1, 1)

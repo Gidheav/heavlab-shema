@@ -1,0 +1,434 @@
+# ─────────────────────────────────────────────────────────────────────
+# English Book Name Aliases
+#
+# Used by bible-core/build.rs to generate a compile-time PHF map:
+#   alias (lowercase) → BookId (u8)
+#
+# Each book entry lists all recognized forms:
+#   - Full canonical name
+#   - Standard abbreviations
+#   - Ordinal/spoken forms (for ASR pipeline)
+#   - Common informal names
+#
+# All matching is case-insensitive at runtime (aliases stored lowercase).
+# ─────────────────────────────────────────────────────────────────────
+
+[[alias]]
+book_id = 1
+aliases = [
+    "genesis", "gen", "ge", "gn",
+]
+
+[[alias]]
+book_id = 2
+aliases = [
+    "exodus", "exod", "exo", "ex",
+]
+
+[[alias]]
+book_id = 3
+aliases = [
+    "leviticus", "lev", "le", "lv",
+]
+
+[[alias]]
+book_id = 4
+aliases = [
+    "numbers", "num", "nu", "nm", "nb",
+]
+
+[[alias]]
+book_id = 5
+aliases = [
+    "deuteronomy", "deut", "deu", "dt",
+]
+
+[[alias]]
+book_id = 6
+aliases = [
+    "joshua", "josh", "jos", "jsh",
+]
+
+[[alias]]
+book_id = 7
+aliases = [
+    "judges", "judg", "jdg", "jg", "jdgs",
+]
+
+[[alias]]
+book_id = 8
+aliases = [
+    "ruth", "rut", "rth", "ru",
+]
+
+[[alias]]
+book_id = 9
+aliases = [
+    "1 samuel", "1samuel", "1 sam", "1sam", "1sa",
+    "first samuel", "i samuel", "i sam",
+]
+
+[[alias]]
+book_id = 10
+aliases = [
+    "2 samuel", "2samuel", "2 sam", "2sam", "2sa",
+    "second samuel", "ii samuel", "ii sam",
+]
+
+[[alias]]
+book_id = 11
+aliases = [
+    "1 kings", "1kings", "1 kgs", "1kgs", "1ki",
+    "first kings", "i kings", "i kgs",
+]
+
+[[alias]]
+book_id = 12
+aliases = [
+    "2 kings", "2kings", "2 kgs", "2kgs", "2ki",
+    "second kings", "ii kings", "ii kgs",
+]
+
+[[alias]]
+book_id = 13
+aliases = [
+    "1 chronicles", "1chronicles", "1 chr", "1chr", "1ch",
+    "first chronicles", "i chronicles", "i chr",
+]
+
+[[alias]]
+book_id = 14
+aliases = [
+    "2 chronicles", "2chronicles", "2 chr", "2chr", "2ch",
+    "second chronicles", "ii chronicles", "ii chr",
+]
+
+[[alias]]
+book_id = 15
+aliases = [
+    "ezra", "ezr", "ez",
+]
+
+[[alias]]
+book_id = 16
+aliases = [
+    "nehemiah", "neh", "ne",
+]
+
+[[alias]]
+book_id = 17
+aliases = [
+    "esther", "esth", "est", "es",
+]
+
+[[alias]]
+book_id = 18
+aliases = [
+    "job", "jb",
+]
+
+[[alias]]
+book_id = 19
+aliases = [
+    "psalms", "psalm", "psa", "ps", "pss",
+]
+
+[[alias]]
+book_id = 20
+aliases = [
+    "proverbs", "prov", "pro", "pr", "prv",
+]
+
+[[alias]]
+book_id = 21
+aliases = [
+    "ecclesiastes", "eccles", "eccl", "ecc", "ec",
+    "qoheleth",
+]
+
+[[alias]]
+book_id = 22
+aliases = [
+    "song of solomon", "song of songs", "song",
+    "sos", "sng", "ss", "canticles",
+]
+
+[[alias]]
+book_id = 23
+aliases = [
+    "isaiah", "isa", "is",
+]
+
+[[alias]]
+book_id = 24
+aliases = [
+    "jeremiah", "jer", "je", "jr",
+]
+
+[[alias]]
+book_id = 25
+aliases = [
+    "lamentations", "lam", "la",
+]
+
+[[alias]]
+book_id = 26
+aliases = [
+    "ezekiel", "ezek", "eze", "ezk",
+]
+
+[[alias]]
+book_id = 27
+aliases = [
+    "daniel", "dan", "da", "dn",
+]
+
+[[alias]]
+book_id = 28
+aliases = [
+    "hosea", "hos", "ho",
+]
+
+[[alias]]
+book_id = 29
+aliases = [
+    "joel", "joe", "jl",
+]
+
+[[alias]]
+book_id = 30
+aliases = [
+    "amos", "amo", "am",
+]
+
+[[alias]]
+book_id = 31
+aliases = [
+    "obadiah", "obad", "oba", "ob",
+]
+
+[[alias]]
+book_id = 32
+aliases = [
+    "jonah", "jon", "jnh",
+]
+
+[[alias]]
+book_id = 33
+aliases = [
+    "micah", "mic", "mc",
+]
+
+[[alias]]
+book_id = 34
+aliases = [
+    "nahum", "nah", "na",
+]
+
+[[alias]]
+book_id = 35
+aliases = [
+    "habakkuk", "hab", "hb",
+]
+
+[[alias]]
+book_id = 36
+aliases = [
+    "zephaniah", "zeph", "zep", "zp",
+]
+
+[[alias]]
+book_id = 37
+aliases = [
+    "haggai", "hag", "hg",
+]
+
+[[alias]]
+book_id = 38
+aliases = [
+    "zechariah", "zech", "zec", "zc",
+]
+
+[[alias]]
+book_id = 39
+aliases = [
+    "malachi", "mal", "ml",
+]
+
+# ── New Testament ────────────────────────────────────────────────────
+
+[[alias]]
+book_id = 40
+aliases = [
+    "matthew", "matt", "mat", "mt",
+]
+
+[[alias]]
+book_id = 41
+aliases = [
+    "mark", "mar", "mrk", "mk",
+]
+
+[[alias]]
+book_id = 42
+aliases = [
+    "luke", "luk", "lk",
+]
+
+[[alias]]
+book_id = 43
+aliases = [
+    "john", "joh", "jhn", "jn",
+]
+
+[[alias]]
+book_id = 44
+aliases = [
+    "acts", "act", "ac",
+    "acts of the apostles",
+]
+
+[[alias]]
+book_id = 45
+aliases = [
+    "romans", "rom", "ro", "rm",
+]
+
+[[alias]]
+book_id = 46
+aliases = [
+    "1 corinthians", "1corinthians", "1 cor", "1cor", "1co",
+    "first corinthians", "i corinthians", "i cor",
+]
+
+[[alias]]
+book_id = 47
+aliases = [
+    "2 corinthians", "2corinthians", "2 cor", "2cor", "2co",
+    "second corinthians", "ii corinthians", "ii cor",
+]
+
+[[alias]]
+book_id = 48
+aliases = [
+    "galatians", "gal", "ga",
+]
+
+[[alias]]
+book_id = 49
+aliases = [
+    "ephesians", "eph", "ep", "ephes",
+]
+
+[[alias]]
+book_id = 50
+aliases = [
+    "philippians", "phil", "phi", "php", "pp",
+]
+
+[[alias]]
+book_id = 51
+aliases = [
+    "colossians", "col", "co",
+]
+
+[[alias]]
+book_id = 52
+aliases = [
+    "1 thessalonians", "1thessalonians", "1 thess", "1thess", "1th",
+    "first thessalonians", "i thessalonians", "i thess",
+]
+
+[[alias]]
+book_id = 53
+aliases = [
+    "2 thessalonians", "2thessalonians", "2 thess", "2thess", "2th",
+    "second thessalonians", "ii thessalonians", "ii thess",
+]
+
+[[alias]]
+book_id = 54
+aliases = [
+    "1 timothy", "1timothy", "1 tim", "1tim", "1ti",
+    "first timothy", "i timothy", "i tim",
+]
+
+[[alias]]
+book_id = 55
+aliases = [
+    "2 timothy", "2timothy", "2 tim", "2tim", "2ti",
+    "second timothy", "ii timothy", "ii tim",
+]
+
+[[alias]]
+book_id = 56
+aliases = [
+    "titus", "tit", "ti",
+]
+
+[[alias]]
+book_id = 57
+aliases = [
+    "philemon", "phm", "pm", "phlm",
+]
+
+[[alias]]
+book_id = 58
+aliases = [
+    "hebrews", "heb", "he",
+]
+
+[[alias]]
+book_id = 59
+aliases = [
+    "james", "jam", "jas", "jm",
+]
+
+[[alias]]
+book_id = 60
+aliases = [
+    "1 peter", "1peter", "1 pet", "1pet", "1pe",
+    "first peter", "i peter", "i pet",
+]
+
+[[alias]]
+book_id = 61
+aliases = [
+    "2 peter", "2peter", "2 pet", "2pet", "2pe",
+    "second peter", "ii peter", "ii pet",
+]
+
+[[alias]]
+book_id = 62
+aliases = [
+    "1 john", "1john", "1 jn", "1jn", "1jo",
+    "first john", "i john", "i jn",
+]
+
+[[alias]]
+book_id = 63
+aliases = [
+    "2 john", "2john", "2 jn", "2jn", "2jo",
+    "second john", "ii john", "ii jn",
+]
+
+[[alias]]
+book_id = 64
+aliases = [
+    "3 john", "3john", "3 jn", "3jn", "3jo",
+    "third john", "iii john", "iii jn",
+]
+
+[[alias]]
+book_id = 65
+aliases = [
+    "jude", "jud", "jd",
+]
+
+[[alias]]
+book_id = 66
+aliases = [
+    "revelation", "rev", "re",
+    "revelations", "apocalypse",
+    "revelation of john",
+]

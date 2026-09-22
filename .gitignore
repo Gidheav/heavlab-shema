@@ -1,0 +1,40 @@
+﻿# Rust build output (anywhere)
+target/
+**/target/
+
+# Worktrees (full copies of the project)
+.worktrees/
+**/.worktrees/
+
+# Large model files
+data/models/
+**/data/models/
+*.tar.bz2
+*.onnx
+
+# Source archives
+super_bible.zip
+super_bible-main/
+super_bible-master/
+Bible-niv.zip
+Bible-niv-main/
+Bible-niv-master/
+SUPER_BIBLE/
+.zraw_data/
+.zraw_metadata/
+__pycache__/
+*.pkl
+*.db
+
+# Misc
+*.log
+.DS_Store
+
+.vscode/settings.json
+.vscode/
+
+.vscode/settings.json
+.vscode/
+
+.vscode/settings.json
+.vscode/

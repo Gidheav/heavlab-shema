@@ -1,0 +1,10 @@
+[package]
+name = "bible-desktop"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dioxus = { version = "0.5.6", features = ["desktop"] }
+bible-core = { path = "../bible-core" }
+bible-asr = { path = "../bible-asr", features = ["desktop-audio", "sherpa"] }
+crossbeam-channel = { workspace = true }

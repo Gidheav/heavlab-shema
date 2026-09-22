@@ -1,0 +1,32 @@
+[package]
+name = "bible-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Pure logic: verse store, resolver, parsing grammar. No FFI, no OS calls."
+
+[dependencies]
+phf = { version = "0.11", features = ["std", "macros"] }
+rkyv = { workspace = true }
+blake3 = { workspace = true }
+thiserror = { workspace = true }
+memmap2 = "0.9"
+yoke = { version = "0.7", features = ["derive"] }
+
+[build-dependencies]
+phf_codegen = "0.11"
+toml = "0.8"
+serde = { workspace = true }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1"
+
+[[bench]]
+name = "lookup"
+harness = false
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"

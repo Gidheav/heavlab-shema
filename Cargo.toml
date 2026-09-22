@@ -1,0 +1,40 @@
+[workspace]
+resolver = "2"
+members = [
+    "hv-audio",
+    "hv-vad",
+    "hv-asr",
+    "hv-pipeline",
+    "bible-core",
+    "bible-rt",
+    "hv-desktop",
+    "bible-datagen",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+
+# ── Shared dependencies ──────────────────────────────────────────────
+[workspace.dependencies]
+thiserror = "2"
+crossbeam-channel = "0.5"
+rkyv = { version = "0.8", features = ["bytecheck"] }
+blake3 = "1"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# ── Release profile ──────────────────────────────────────────────────
+[profile.release]
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
+[profile.bench]
+lto = "thin"
+codegen-units = 1
