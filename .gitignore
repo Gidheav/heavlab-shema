@@ -12,6 +12,11 @@ data/models/
 *.tar.bz2
 *.onnx
 
+IMPLEMENTATION.md
+Opus_Blueprint.md
+Project core.md
+PRODUCT_bLUEPRINT.md
+
 # Source archives
 super_bible.zip
 super_bible-main/
