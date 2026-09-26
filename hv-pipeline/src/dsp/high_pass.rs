@@ -29,7 +29,7 @@ impl HighPassFilter {
     }
     
     fn recalculate(&mut self) {
-        let num_stages = (self.slope / 12).max(1) as usize; // Minimum 1 stage for 6dB (though biquad is 12dB, we just use 1 stage)
+        let _num_stages = (self.slope / 12).max(1) as usize; // Minimum 1 stage for 6dB (though biquad is 12dB, we just use 1 stage)
         // Note: For a true 6dB/oct filter we'd use a 1st order filter.
         // For simplicity, we'll map 6dB to 1 biquad (12dB) if they ask for it, 
         // or we could implement a 1st order. Let's just use 12dB increments.

@@ -59,7 +59,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
                     )
                     .clicked()
                 {
-                    // TODO: Open settings
+                    app.config.layout_state.settings_open = true;
                 }
             });
 
@@ -167,7 +167,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
                     });
                 });
 
-                // INPUT LEVEL section
+                // INPUT LEVEL section                // INPUT LEVEL section
                 CollapsibleSection::new("INPUT LEVEL")
                     .with_badge("RMS PK")
                     .show(ui, |ui| {

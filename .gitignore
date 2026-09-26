@@ -1,4 +1,4 @@
-﻿# Rust build output
+# Rust build output
 target/
 **/target/
 
@@ -6,11 +6,21 @@ target/
 .worktrees/
 **/.worktrees/
 
-# Large model files
+# Large model files — NEVER push these
 data/models/
 **/data/models/
 *.tar.bz2
 *.onnx
+*.bin
+!data/packs/*.bin
+*.pt
+*.pth
+*.safetensors
+*.gguf
+*.ggml
+*.tflite
+*.pb
+*.h5
 
 # Planning docs (keep README only)
 IMPLEMENTATION_PLAN.md
@@ -18,6 +28,10 @@ Opus_Blueprint.md
 PRODUCT_BLUEPRINT.md
 Project core.md
 
+IMPLEMENTATION_PLAN.md
+Opus_Blueprint.md
+PRODUCT_BLUEPRINT.md
+Project core.md
 # Source archives
 super_bible.zip
 super_bible-main/

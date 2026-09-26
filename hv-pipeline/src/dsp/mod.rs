@@ -117,7 +117,7 @@ impl DspChain {
     }
     
     /// Update config at runtime
-    pub fn update_config(&mut self, config: &DspConfig) {
+    pub fn update_config(&mut self, _config: &DspConfig) {
         // Implementation left for later, or we can just reconstruct the chain since it's cheap,
         // but state resets might not be desirable. Ideally we'd update each processor.
         // For now, we will add update_config to the processors as needed.

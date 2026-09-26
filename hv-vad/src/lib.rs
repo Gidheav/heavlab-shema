@@ -9,6 +9,15 @@ pub mod energy;
 pub use energy::EnergyVad;
 
 use hv_audio::AudioChunk;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum VadError {
+    #[error("ONNX error: {0}")]
+    Onnx(String),
+    #[error("Invalid model path: {0}")]
+    ModelPath(String),
+}
 
 /// Coarse detector output consumed by the pipeline worker.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

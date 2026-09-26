@@ -17,7 +17,7 @@ const MIN_TRANSCRIPT_CONFIDENCE: f32 = 0.6;
 
 /// Handle held by the UI. The worker thread owns capture, VAD, ASR, and the detector.
 pub struct Pipeline {
-    command_tx: Sender<PipelineCommand>,
+    command_tx: Option<Sender<PipelineCommand>>,
     event_rx: Receiver<PipelineEvent>,
     worker_thread: Option<thread::JoinHandle<()>>,
 }
@@ -41,7 +41,7 @@ impl Pipeline {
             .map_err(|error| PipelineError::Spawn(error.to_string()))?;
 
         Ok(Self {
-            command_tx,
+            command_tx: Some(command_tx),
             event_rx,
             worker_thread: Some(worker_thread),
         })
@@ -52,22 +52,29 @@ impl Pipeline {
     }
 
     pub fn send_command(&self, cmd: PipelineCommand) {
-        if let Err(error) = self.command_tx.try_send(cmd) {
-            tracing::warn!("pipeline command dropped: {error}");
+        if let Some(tx) = &self.command_tx {
+            if let Err(error) = tx.try_send(cmd) {
+                tracing::warn!("pipeline command dropped: {error}");
+            }
         }
     }
 }
 
 impl Drop for Pipeline {
     fn drop(&mut self) {
-        // Send stop command just in case, though the channel dropping will break the loop anyway
-        let _ = self.command_tx.try_send(PipelineCommand::Stop);
-        
-        // Dropping command_tx will close the channel, causing worker loop to exit
-        if let Some(thread) = self.worker_thread.take() {
-            tracing::info!("Joining pipeline worker thread...");
-            let _ = thread.join();
-            tracing::info!("Pipeline worker thread joined.");
+        // Send Stop to cleanly halt audio capture before we tear down
+        if let Some(tx) = &self.command_tx {
+            let _ = tx.try_send(PipelineCommand::Stop);
+        }
+        // Drop the sender BEFORE joining — this causes command_rx.recv()
+        // in the worker loop to return Err, breaking the loop cleanly.
+        self.command_tx = None;
+
+        if let Some(_thread) = self.worker_thread.take() {
+            // We detach instead of joining because some audio capture drivers
+            // (like WASAPI via cpal) can deadlock if we block the main thread waiting
+            // for the stream to close. The OS will clean up the thread when the process exits.
+            tracing::info!("Pipeline dropped, worker thread detached for shutdown.");
         }
     }
 }

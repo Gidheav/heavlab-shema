@@ -4,7 +4,6 @@
 
 use egui::{Response, Ui};
 
-use crate::theme::{accent, bg_surface, border_subtle, text_primary, text_secondary};
 
 pub struct PanelChrome {
     title: String,

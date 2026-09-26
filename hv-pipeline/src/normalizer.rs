@@ -1,6 +1,5 @@
 //! Normalizes spoken numbers ("three sixteen") and fuzzy book names.
 
-use bible_core::types::BookId;
 use std::collections::HashMap;
 use std::sync::OnceLock;
 

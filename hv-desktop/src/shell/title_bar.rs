@@ -98,7 +98,7 @@ fn title_menu_btn(ui: &mut egui::Ui, app: &mut HvBibleApp, label: &str) {
                 ui.set_min_width(180.0);
 
                 match label {
-                    "File"      => file_menu(ui),
+                    "File"      => file_menu(ui, app),
                     "Edit"      => edit_menu(ui, app),
                     "View"      => view_menu(ui, app),
                     "Session"   => session_menu(ui, app),
@@ -274,7 +274,7 @@ fn ghost_submenu(ui: &mut egui::Ui, label: &str, add_contents: impl FnOnce(&mut 
 
 // ─── File ─────────────────────────────────────────────────────────────────────
 
-fn file_menu(ui: &mut egui::Ui) {
+fn file_menu(ui: &mut egui::Ui, app: &mut HvBibleApp) {
     section(ui, "SERVICE SESSION");
     item(ui, "New Service Session",       "Ctrl+N");
     item(ui, "Open Service Session…",     "Ctrl+O");
@@ -301,7 +301,10 @@ fn file_menu(ui: &mut egui::Ui) {
     item(ui, "Clear Recent…",             "");
     sep(ui);
 
-    item(ui, "Preferences…",             "Ctrl+,");
+    if item(ui, "Preferences…",             "Ctrl+,") {
+        app.config.layout_state.settings_open = true;
+        ui.memory_mut(|m| m.close_popup());
+    }
     item(ui, "Exit",                      "Alt+F4");
 }
 
@@ -328,7 +331,10 @@ fn edit_menu(ui: &mut egui::Ui, app: &mut HvBibleApp) {
     sep(ui);
 
     item(ui, "Find in Sermon Log…",      "Ctrl+Shift+F");
-    item(ui, "Preferences…",             "Ctrl+,");
+    if item(ui, "Preferences…",             "Ctrl+,") {
+        app.config.layout_state.settings_open = true;
+        ui.memory_mut(|m| m.close_popup());
+    }
 }
 
 // ─── View ─────────────────────────────────────────────────────────────────────

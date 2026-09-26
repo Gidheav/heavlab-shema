@@ -1,7 +1,6 @@
 use eframe::egui::{self, Ui};
 
 use crate::app::HvBibleApp;
-use crate::panels::audio::data_row;
 
 pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
     let led = &mut app.audio_mock.led;

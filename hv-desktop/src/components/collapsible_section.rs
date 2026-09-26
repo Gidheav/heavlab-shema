@@ -3,7 +3,6 @@
 
 use egui::Ui;
 
-use crate::theme::{bg_surface_sunken, border_subtle, text_secondary};
 
 pub struct CollapsibleSection {
     title: String,

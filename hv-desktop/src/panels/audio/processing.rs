@@ -1,7 +1,6 @@
 use eframe::egui::{self, Ui};
 
 use crate::app::HvBibleApp;
-use crate::config::AppConfig;
 use hv_pipeline::events::PipelineCommand;
 
 pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {

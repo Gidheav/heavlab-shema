@@ -17,6 +17,7 @@ pub struct AppConfig {
     pub dark_mode: bool,
     pub asr_mode: String,
     pub asr_model_size: String,
+    pub asr_model_id: String,
     pub vad_mode: String,
     pub vad_sensitivity: f32,
     pub noise_gate_enabled: bool,
@@ -32,6 +33,10 @@ pub struct AppConfig {
     pub calibration_done: bool,
     #[serde(default, rename = "layoutState")]
     pub layout_state: LayoutState,
+    #[serde(default)]
+    pub theme_id: String,
+    #[serde(default)]
+    pub theme_mode: String, // "dark", "light", "follow_system"
 }
 
 impl Default for AppConfig {
@@ -45,6 +50,7 @@ impl Default for AppConfig {
             dark_mode: true,
             asr_mode: "sherpa".to_string(),
             asr_model_size: "medium".to_string(),
+            asr_model_id: "sherpa-zipformer-en".to_string(),
             vad_mode: "hybrid".to_string(),
             vad_sensitivity: 0.5,
             noise_gate_enabled: false,
@@ -55,10 +61,12 @@ impl Default for AppConfig {
             compressor_ratio: 4.0,
             use_gpu: false,
             num_threads: 4,
-            hotwords_enabled: true,
+            hotwords_enabled: false,
             beam_size: 4,
             calibration_done: false,
             layout_state: LayoutState::default(),
+            theme_id: "purple_graphite_dark".to_string(),
+            theme_mode: "dark".to_string(),
         }
     }
 }
@@ -69,10 +77,14 @@ impl AppConfig {
         let Ok(raw) = fs::read_to_string(&path) else {
             return Self::default();
         };
-        toml::from_str(&raw).unwrap_or_else(|error| {
+        let mut config: Self = toml::from_str(&raw).unwrap_or_else(|error| {
             tracing::warn!("config parse failed ({path:?}): {error}");
             Self::default()
-        })
+        });
+        
+        // Ensure settings window is not persisted as open across restarts
+        config.layout_state.settings_open = false;
+        config
     }
 
     pub fn save(&self) -> Result<(), io::Error> {
@@ -113,6 +125,7 @@ window_height = 800.0
 dark_mode = true
 asr_mode = "sherpa"
 asr_model_size = "medium"
+asr_model_id = "sherpa-zipformer-en"
 vad_mode = "hybrid"
 vad_sensitivity = 0.5
 noise_gate_enabled = false
@@ -126,6 +139,8 @@ num_threads = 4
 hotwords_enabled = true
 beam_size = 4
 calibration_done = false
+theme_id = "purple_graphite_dark"
+theme_mode = "dark"
 "#;
 
         let config: AppConfig = toml::from_str(raw).expect("old config should parse");

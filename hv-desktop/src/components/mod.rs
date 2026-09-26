@@ -9,7 +9,4 @@ pub mod slider_with_readout;
 pub mod status_pill;
 pub mod toggle_chip;
 
-pub use collapsible_section::CollapsibleSection;
 pub use meter_bar::MeterBar;
-pub use status_pill::Status;
-pub use status_pill::StatusPill;

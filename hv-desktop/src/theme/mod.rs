@@ -1,11 +1,19 @@
-//! HV-Bible Desktop design system.
-//! Supports Purple Graphite (Dark) and Light variants.
-#![allow(dead_code)]
+//! Advanced theme system with 10+ premium themes, font customization, and theme import/export.
+
+pub mod colors;
+pub mod fonts;
+pub mod import_export;
+pub mod registry;
+pub mod theme;
+
+pub use colors::{ThemeColors, ColorPalette, ColorPalette32};
+pub use fonts::{FontConfig, FontFamily, FontStyle, FontSize};
+pub use import_export::{ThemeExport, UserThemeConfig};
+pub use registry::{ThemeRegistry, ThemeCategory};
+pub use theme::{Theme, ThemeMode, ThemePreview};
 
 use egui::Color32;
 use std::sync::atomic::{AtomicBool, Ordering};
-
-pub const THEME_NAME: &str = "Purple Graphite";
 
 pub static IS_DARK_MODE: AtomicBool = AtomicBool::new(true);
 
@@ -17,13 +25,14 @@ pub fn is_dark() -> bool {
     IS_DARK_MODE.load(Ordering::Relaxed)
 }
 
-// Status colors stay semantically distinct.
+// Status colors stay semantically distinct across all themes
 pub const STATUS_SUCCESS: Color32 = Color32::from_rgb(0x78, 0xB1, 0x78);
 pub const STATUS_WARNING: Color32 = Color32::from_rgb(0xC8, 0x9B, 0x5D);
 pub const STATUS_ERROR: Color32 = Color32::from_rgb(0xBE, 0x63, 0x72);
 pub const STATUS_INFO: Color32 = Color32::from_rgb(0x7C, 0x92, 0xD6);
 pub const STATUS_NEUTRAL: Color32 = Color32::from_rgb(0x84, 0x7D, 0x92);
 
+// Legacy theme functions for backward compatibility
 pub fn apply_visuals(ctx: &egui::Context, dark_mode: bool) {
     set_dark_mode(dark_mode);
 
@@ -96,14 +105,4 @@ pub fn accent_hover() -> Color32 {
 }
 pub fn accent_muted() -> Color32 {
     if is_dark() { Color32::from_rgb(0x4F, 0x39, 0x73) } else { Color32::from_rgb(0xDF, 0xD1, 0xF7) }
-}
-
-pub fn meter_color(rms_db: f32) -> Color32 {
-    if rms_db > -3.0 {
-        STATUS_ERROR
-    } else if rms_db > -12.0 {
-        STATUS_WARNING
-    } else {
-        STATUS_SUCCESS
-    }
 }

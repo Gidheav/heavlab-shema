@@ -1,7 +1,7 @@
 use eframe::egui::{self, Context};
 
 use crate::app::HvBibleApp;
-use crate::theme::{self, bg_base, text_primary, text_secondary};
+use crate::theme::{self};
 
 pub fn show(ctx: &Context, app: &HvBibleApp) {
     if !app.program_out {

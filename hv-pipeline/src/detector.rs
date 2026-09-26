@@ -61,7 +61,7 @@ impl VerseDetector {
 
         let book_id = verse_ref.book;
         let chapter = verse_ref.chapter;
-        let verse = verse_ref.verse;
+        let _verse = verse_ref.verse;
 
         // If it's a "lone verse" (usually chapter 1 if book is missing, but bible_core might fail earlier. 
         // Assuming bible_core returns Genesis 1:X if only a verse is spoken? We'd need to adapt bible_core 

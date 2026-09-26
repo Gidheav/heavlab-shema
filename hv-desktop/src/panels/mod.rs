@@ -5,3 +5,4 @@ pub mod queue_panel;
 pub mod run_sheet_panel;
 pub mod transcript_panel;
 pub mod verse_stage;
+pub mod settings_window;

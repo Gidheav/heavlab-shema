@@ -4,7 +4,6 @@
 
 use egui::Ui;
 
-use crate::theme::{text_secondary, text_tertiary};
 
 pub struct EmptyState {
     message: String,

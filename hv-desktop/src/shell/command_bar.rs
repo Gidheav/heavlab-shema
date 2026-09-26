@@ -59,7 +59,9 @@ pub fn show(ctx: &Context, app: &mut HvBibleApp) {
                     });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.add_space(8.0);
-                    secondary_button(ui, "Settings");
+                    if secondary_button(ui, "Settings").clicked() {
+                        app.config.layout_state.settings_open = true;
+                    }
                     secondary_button(ui, "Health");
                 });
             });

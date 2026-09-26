@@ -1,7 +1,7 @@
 use eframe::egui::{self, Ui};
 
 use crate::app::HvBibleApp;
-use crate::theme::{bg_surface_sunken, border_subtle, STATUS_SUCCESS, text_secondary};
+use crate::theme::STATUS_SUCCESS;
 
 pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
     ui.columns(4, |columns| {

@@ -24,6 +24,9 @@ pub fn handle(ctx: &Context, app: &mut HvBibleApp) {
         if ctrl && input.key_pressed(Key::F) {
             app.focus_manual = true;
         }
+        if ctrl && input.key_pressed(Key::Comma) {
+            app.config.layout_state.settings_open = !app.config.layout_state.settings_open;
+        }
         if input.key_pressed(Key::F5) {
             app.toggle_listening();
         }

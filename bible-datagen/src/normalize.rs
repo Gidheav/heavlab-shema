@@ -8,7 +8,6 @@ use bible_core::canon::{book_name, chapter_count, resolve_book_alias, verse_coun
 use bible_core::types::BookId;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::io::{self, stderr, Write};
 
 /// Standard normalized Bible format
 #[derive(Debug, Clone, Serialize, Deserialize)]

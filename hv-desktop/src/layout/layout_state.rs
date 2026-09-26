@@ -14,6 +14,10 @@ pub struct LayoutState {
     pub middle_bottom_collapsed: bool,
     pub middle_bottom_height: f32,
     pub ribbon_collapsed: bool,
+    #[serde(default)]
+    pub settings_open: bool,
+    #[serde(default)]
+    pub settings_tab: usize,
 }
 
 impl Default for LayoutState {
@@ -26,6 +30,8 @@ impl Default for LayoutState {
             middle_bottom_collapsed: false,
             middle_bottom_height: DEFAULT_MIDDLE_BOTTOM_HEIGHT,
             ribbon_collapsed: false,
+            settings_open: false,
+            settings_tab: 0,
         }
     }
 }

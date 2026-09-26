@@ -79,7 +79,7 @@ pub fn show_primary_toolbar(ui: &mut Ui, app: &mut HvBibleApp) {
             .button(egui::RichText::new("⚙").color(crate::theme::text_secondary()))
             .clicked()
         {
-            // TODO: Open settings dialog
+            app.config.layout_state.settings_open = true;
         }
 
         ui.add_space(8.0);

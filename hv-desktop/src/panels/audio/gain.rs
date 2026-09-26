@@ -1,4 +1,4 @@
-use eframe::egui::{self, ComboBox, Ui};
+use eframe::egui::Ui;
 
 use crate::app::HvBibleApp;
 use crate::panels::audio::labeled_slider;

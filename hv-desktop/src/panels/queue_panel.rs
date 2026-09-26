@@ -1,7 +1,6 @@
 use eframe::egui::{self, Ui};
 
 use crate::app::HvBibleApp;
-use crate::theme::{bg_surface_sunken, border_subtle, text_primary, text_secondary};
 
 pub fn show(ui: &mut Ui, _app: &mut HvBibleApp) {
     ui.horizontal(|ui| {

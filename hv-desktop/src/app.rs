@@ -10,7 +10,7 @@ use crate::mock::broadcast_state::BroadcastState;
 use crate::pipeline_integration::{self, PipelineConfig};
 use crate::shell;
 use crate::shortcuts;
-use crate::theme::{self, STATUS_ERROR, STATUS_INFO, STATUS_SUCCESS, STATUS_WARNING, text_inverse};
+use crate::theme::{self, STATUS_ERROR, STATUS_INFO, STATUS_SUCCESS, STATUS_WARNING, ThemeRegistry, Theme, ThemeMode};
 
 pub fn manual_verse_id() -> Id {
     Id::new("manual_verse")
@@ -58,6 +58,12 @@ pub struct HvBibleApp {
     pub asr_info: crate::pipeline_integration::AsrEngineInfo,
     verse_history: Vec<(String, String)>,
     pub config: AppConfig,
+    pub available_models: Vec<hv_asr::ModelInfo>,
+    pub selected_model_id: String,
+    pub restart_required: bool,
+    pub theme_registry: ThemeRegistry,
+    pub current_theme: Theme,
+    pub theme_preview: Option<crate::theme::ThemePreview>,
     blink_clock: Instant,
     pub dark_mode: bool,
 }
@@ -86,6 +92,7 @@ impl HvBibleApp {
             use_gpu: config.use_gpu,
             asr_mode: config.asr_mode.clone(),
             asr_model_size: config.asr_model_size.clone(),
+            asr_model_id: config.asr_model_id.clone(),
             vad_mode: config.vad_mode.clone(),
             vad_sensitivity: config.vad_sensitivity,
             noise_gate_enabled: config.noise_gate_enabled,
@@ -100,13 +107,33 @@ impl HvBibleApp {
         };
 
         let (pipeline, store, asr_info) =
-            match pipeline_integration::create_pipeline(pipeline_config) {
+            match pipeline_integration::create_pipeline(pipeline_config, None) {
                 Ok((p, s, i)) => (p, s, i),
                 Err(e) => panic!("Failed to initialize pipeline: {e}"),
             };
 
         let mut audio_mock = AudioControlState::mock_running();
         audio_mock.device.name = selected_device.clone();
+
+        // Scan available models
+        let data_path = crate::paths::data_dir();
+        let models_path = data_path.join("models");
+        let available_models = hv_asr::scan_models(&models_path);
+        let selected_model_id = config.asr_model_id.clone();
+
+        // Initialize theme system
+        let theme_registry = ThemeRegistry::new();
+        let theme_mode = match config.theme_mode.as_str() {
+            "light" => ThemeMode::Light,
+            "follow_system" => ThemeMode::FollowSystem,
+            _ => ThemeMode::Dark,
+        };
+        let current_theme = Theme::new(config.theme_id.clone(), theme_mode);
+        
+        // Apply initial theme
+        if let Some(definition) = theme_registry.get(&current_theme.id) {
+            current_theme.apply(&cc.egui_ctx, definition);
+        }
 
         Self {
             current_verse: None,
@@ -142,6 +169,12 @@ impl HvBibleApp {
             asr_info,
             verse_history: Vec::new(),
             config: config.clone(),
+            available_models,
+            selected_model_id,
+            restart_required: false,
+            theme_registry,
+            current_theme,
+            theme_preview: None,
             blink_clock: Instant::now(),
             dark_mode: config.dark_mode,
         }
@@ -275,6 +308,15 @@ impl HvBibleApp {
         }
     }
 
+    pub fn change_model(&mut self, model_id: String) {
+        if self.selected_model_id != model_id {
+            self.selected_model_id = model_id.clone();
+            self.config.asr_model_id = model_id;
+            let _ = self.config.save();
+            self.restart_required = true;
+        }
+    }
+
     fn poll_events(&mut self) {
         while let Ok(event) = self.pipeline.events().try_recv() {
             match event {
@@ -377,7 +419,11 @@ impl HvBibleApp {
                 STATUS_ERROR
             };
         }
-        ctx.request_repaint();
+        if self.pipeline_state != PipelineState::Stopped {
+            ctx.request_repaint_after(std::time::Duration::from_millis(33)); // ~30 FPS
+        } else {
+            ctx.request_repaint_after(std::time::Duration::from_millis(200)); // ~5 FPS when stopped
+        }
     }
 
     fn persist_window(&mut self, ctx: &Context) {
@@ -403,6 +449,8 @@ impl eframe::App for HvBibleApp {
         shell::status_bar::show(ctx, self);
         shell::workspace::show(ctx, self);
         shell::program_out::show(ctx, self);
+        
+        crate::panels::settings_window::show(ctx, self);
 
         self.persist_window(ctx);
     }
