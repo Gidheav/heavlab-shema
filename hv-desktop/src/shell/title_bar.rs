@@ -87,7 +87,7 @@ fn title_menu_btn(ui: &mut egui::Ui, app: &mut HvBibleApp, label: &str) {
         // menu_button calls inside it automatically open to the RIGHT.
         let padded_label = format!("  {}  ", label);
         ui.menu_button(
-            egui::RichText::new(padded_label).size(13.0),
+            egui::RichText::new(padded_label),
             |ui| {
                 // Ghost visuals inside the dropdown
                 ui.visuals_mut().widgets.inactive.bg_fill = egui::Color32::TRANSPARENT;
@@ -197,7 +197,7 @@ fn section(ui: &mut egui::Ui, text: &str) {
         egui::pos2(rect.left() + 8.0, rect.center().y),
         egui::Align2::LEFT_CENTER,
         text,
-        egui::FontId::proportional(10.0),
+        ui.style().text_styles[&egui::TextStyle::Small].clone(),
         crate::theme::text_tertiary(),
     );
 }
@@ -219,7 +219,7 @@ fn item(ui: &mut egui::Ui, label: &str, shortcut: &str) -> bool {
         egui::pos2(rect.left() + 12.0, rect.center().y),
         egui::Align2::LEFT_CENTER,
         label,
-        egui::FontId::proportional(13.0),
+        ui.style().text_styles[&egui::TextStyle::Body].clone(),
         if resp.hovered() { crate::theme::text_primary() } else { crate::theme::text_secondary() },
     );
 
@@ -229,7 +229,7 @@ fn item(ui: &mut egui::Ui, label: &str, shortcut: &str) -> bool {
             egui::pos2(rect.right() - 10.0, rect.center().y),
             egui::Align2::RIGHT_CENTER,
             shortcut,
-            egui::FontId::proportional(11.0),
+            ui.style().text_styles[&egui::TextStyle::Small].clone(),
             crate::theme::text_tertiary(),
         );
     }

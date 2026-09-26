@@ -4,11 +4,10 @@ use crate::app::HvBibleApp;
 
 pub fn show(ui: &mut Ui, _app: &mut HvBibleApp) {
     ui.horizontal(|ui| {
-        ui.label(
+        ui.heading(
             egui::RichText::new("SERVICE QUEUE")
-                .size(13.0)
-                .strong()
-                .color(crate::theme::text_primary()),
+                .color(crate::theme::accent())
+                .strong(),
         );
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             let _ = ui.button("Import");
@@ -40,18 +39,17 @@ pub fn show(ui: &mut Ui, _app: &mut HvBibleApp) {
                 ui.horizontal(|ui| {
                     ui.label(
                         egui::RichText::new(format!("{}", index + 1))
-                            .size(11.0)
+                            .small()
                             .monospace()
                             .color(crate::theme::text_secondary()),
                     );
                     ui.vertical(|ui| {
                         ui.label(
                             egui::RichText::new(*reference)
-                                .size(12.0)
                                 .strong()
                                 .color(crate::theme::text_primary()),
                         );
-                        ui.label(egui::RichText::new(*text).size(11.0).color(crate::theme::text_secondary()));
+                        ui.label(egui::RichText::new(*text).small().color(crate::theme::text_secondary()));
                     });
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         let _ = ui.button("x");

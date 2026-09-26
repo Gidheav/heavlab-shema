@@ -383,23 +383,82 @@ fn reopen_handle(ui: &mut Ui, rect: Rect, id: &'static str, label: &'static str)
         .clicked()
 }
 
+fn workspace_tab_btn(ui: &mut egui::Ui, label: &str, active: bool, base_px: f32) -> egui::Response {
+    ui.scope(|ui| {
+        ui.visuals_mut().button_frame = false;
+        ui.visuals_mut().widgets.inactive.bg_fill = egui::Color32::TRANSPARENT;
+        ui.visuals_mut().widgets.inactive.bg_stroke = egui::Stroke::NONE;
+        ui.visuals_mut().widgets.hovered.bg_fill = crate::theme::bg_surface_raised();
+        ui.visuals_mut().widgets.hovered.bg_stroke = egui::Stroke::NONE;
+
+        let resp = ui.add(
+            egui::Button::new(
+                egui::RichText::new(format!("  {}  ", label))
+                    .size(base_px * 0.85)
+                    .color(if active {
+                        crate::theme::text_primary()
+                    } else {
+                        crate::theme::text_secondary()
+                    }),
+            )
+            .fill(if active {
+                crate::theme::bg_surface_raised()
+            } else {
+                egui::Color32::TRANSPARENT
+            })
+            .stroke(egui::Stroke::NONE)
+            .min_size(egui::vec2(0.0, 28.0)),
+        );
+
+        if active {
+            let r = resp.rect;
+            ui.painter().line_segment(
+                [
+                    egui::pos2(r.left() + 6.0, r.bottom()),
+                    egui::pos2(r.right() - 6.0, r.bottom()),
+                ],
+                egui::Stroke::new(2.0, crate::theme::accent()),
+            );
+        }
+        resp
+    })
+    .inner
+}
+
 fn right_tabs(ui: &mut egui::Ui, app: &mut HvBibleApp) {
-    ui.horizontal_wrapped(|ui| {
-        for (index, tab) in app.workspace_preset.right_tabs.iter().enumerate() {
-            let selected = app.active_right_tab == index;
-            if ui.selectable_label(selected, *tab).clicked() {
-                app.active_right_tab = index;
-            }
-        }
-        if ui
-            .small_button("-")
-            .on_hover_text("Collapse right column")
-            .clicked()
-        {
-            app.config.layout_state.right_collapsed = true;
-        }
-    });
-    ui.separator();
+    let base_px = app.current_theme.font_config.size.to_pixels();
+
+    // Tab header bar
+    egui::Frame::none()
+        .fill(crate::theme::bg_surface())
+        .stroke(egui::Stroke::new(1.0, crate::theme::border_subtle()))
+        .inner_margin(egui::Margin::symmetric(8.0, 4.0))
+        .show(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = 0.0;
+                for (index, tab) in app.workspace_preset.right_tabs.iter().enumerate() {
+                    let selected = app.active_right_tab == index;
+                    let resp = workspace_tab_btn(ui, tab, selected, base_px);
+                    if resp.clicked() {
+                        app.active_right_tab = index;
+                    }
+                }
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.add(
+                        egui::Button::new(
+                            egui::RichText::new("×").size(base_px * 0.9).color(crate::theme::text_tertiary())
+                        )
+                        .fill(egui::Color32::TRANSPARENT)
+                        .stroke(egui::Stroke::NONE)
+                        .min_size(egui::vec2(22.0, 22.0))
+                    ).on_hover_text("Collapse right panel").clicked() {
+                        app.config.layout_state.right_collapsed = true;
+                    }
+                });
+            });
+        });
+
+    ui.add_space(4.0);
     match app.active_right_tab {
         0 => panels::run_sheet_panel::show(ui, app),
         1 => panels::log_panel::show(ui, app),
@@ -409,22 +468,38 @@ fn right_tabs(ui: &mut egui::Ui, app: &mut HvBibleApp) {
 }
 
 fn bottom_tabs(ui: &mut egui::Ui, app: &mut HvBibleApp) {
-    ui.horizontal_wrapped(|ui| {
-        for (index, tab) in app.workspace_preset.bottom_tabs.iter().enumerate() {
-            let selected = app.active_bottom_tab == index;
-            if ui.selectable_label(selected, *tab).clicked() {
-                app.active_bottom_tab = index;
-            }
-        }
-        if ui
-            .small_button("-")
-            .on_hover_text("Collapse bottom row")
-            .clicked()
-        {
-            app.config.layout_state.middle_bottom_collapsed = true;
-        }
-    });
-    ui.separator();
+    let base_px = app.current_theme.font_config.size.to_pixels();
+
+    egui::Frame::none()
+        .fill(crate::theme::bg_surface())
+        .stroke(egui::Stroke::new(1.0, crate::theme::border_subtle()))
+        .inner_margin(egui::Margin::symmetric(8.0, 4.0))
+        .show(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = 0.0;
+                for (index, tab) in app.workspace_preset.bottom_tabs.iter().enumerate() {
+                    let selected = app.active_bottom_tab == index;
+                    let resp = workspace_tab_btn(ui, tab, selected, base_px);
+                    if resp.clicked() {
+                        app.active_bottom_tab = index;
+                    }
+                }
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.add(
+                        egui::Button::new(
+                            egui::RichText::new("×").size(base_px * 0.9).color(crate::theme::text_tertiary())
+                        )
+                        .fill(egui::Color32::TRANSPARENT)
+                        .stroke(egui::Stroke::NONE)
+                        .min_size(egui::vec2(22.0, 22.0))
+                    ).on_hover_text("Collapse bottom panel").clicked() {
+                        app.config.layout_state.middle_bottom_collapsed = true;
+                    }
+                });
+            });
+        });
+
+    ui.add_space(4.0);
     match app.active_bottom_tab {
         0 => panels::transcript_panel::show(ui, app),
         1 => panels::metrics_panel::show(ui, app),

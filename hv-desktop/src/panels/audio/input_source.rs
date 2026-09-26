@@ -44,7 +44,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
         ui.painter().circle_filled(dot.center(), 4.0, health_color);
         ui.label(
             egui::RichText::new(&d.health)
-                .size(11.0)
+                .small()
                 .color(health_color),
         );
     });
@@ -62,7 +62,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
             ui.colored_label(color, &ch.id);
             ui.label(
                 egui::RichText::new(format!("{:.1}dB", ch.peak_db))
-                    .size(10.0)
+                    .small()
                     .monospace()
                     .color(crate::theme::text_secondary()),
             );
@@ -70,7 +70,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
         }
         ui.label(
             egui::RichText::new(format!("Phase: {}", app.audio_mock.routing.phase))
-                .size(10.0)
+                .small()
                 .color(crate::theme::text_secondary()),
         );
     });
@@ -101,7 +101,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
                 .add(
                     egui::Button::new(
                         egui::RichText::new(format!("{} {}", icon, label))
-                            .size(11.0)
+                            .small()
                             .color(crate::theme::text_primary()),
                     )
                     .fill(crate::theme::bg_surface_sunken()),
@@ -121,7 +121,7 @@ fn tag(ui: &mut Ui, label: &str) {
         .show(ui, |ui| {
             ui.label(
                 egui::RichText::new(label)
-                    .size(10.0)
+                    .small()
                     .monospace()
                     .color(crate::theme::text_primary()),
             );

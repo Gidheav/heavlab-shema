@@ -17,6 +17,17 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 pub static IS_DARK_MODE: AtomicBool = AtomicBool::new(true);
 
+use std::cell::RefCell;
+thread_local! {
+    static ACTIVE_COLORS: RefCell<Option<ColorPalette32>> = RefCell::new(None);
+}
+
+pub fn set_active_colors(colors: ColorPalette32) {
+    ACTIVE_COLORS.with(|c| {
+        *c.borrow_mut() = Some(colors);
+    });
+}
+
 pub fn set_dark_mode(dark: bool) {
     IS_DARK_MODE.store(dark, Ordering::Relaxed);
 }
@@ -68,41 +79,41 @@ pub fn apply_visuals(ctx: &egui::Context, dark_mode: bool) {
 }
 
 pub fn bg_base() -> Color32 {
-    if is_dark() { Color32::from_rgb(0x15, 0x13, 0x1D) } else { Color32::from_rgb(0xF5, 0xF5, 0xF7) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.bg_base).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0x15, 0x13, 0x1D) } else { Color32::from_rgb(0xF5, 0xF5, 0xF7) }))
 }
 pub fn bg_surface() -> Color32 {
-    if is_dark() { Color32::from_rgb(0x20, 0x1D, 0x2A) } else { Color32::from_rgb(0xFF, 0xFF, 0xFF) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.bg_surface).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0x20, 0x1D, 0x2A) } else { Color32::from_rgb(0xFF, 0xFF, 0xFF) }))
 }
 pub fn bg_surface_raised() -> Color32 {
-    if is_dark() { Color32::from_rgb(0x2A, 0x25, 0x36) } else { Color32::from_rgb(0xEA, 0xEA, 0xED) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.bg_surface_raised).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0x2A, 0x25, 0x36) } else { Color32::from_rgb(0xEA, 0xEA, 0xED) }))
 }
 pub fn bg_surface_sunken() -> Color32 {
-    if is_dark() { Color32::from_rgb(0x11, 0x10, 0x18) } else { Color32::from_rgb(0xE1, 0xE1, 0xE5) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.bg_surface_sunken).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0x11, 0x10, 0x18) } else { Color32::from_rgb(0xE1, 0xE1, 0xE5) }))
 }
 pub fn border_subtle() -> Color32 {
-    if is_dark() { Color32::from_rgb(0x36, 0x30, 0x46) } else { Color32::from_rgb(0xD2, 0xD2, 0xD7) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.border_subtle).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0x36, 0x30, 0x46) } else { Color32::from_rgb(0xD2, 0xD2, 0xD7) }))
 }
 pub fn border_strong() -> Color32 {
-    if is_dark() { Color32::from_rgb(0x4B, 0x42, 0x61) } else { Color32::from_rgb(0xAD, 0xAD, 0xB5) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.border_strong).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0x4B, 0x42, 0x61) } else { Color32::from_rgb(0xAD, 0xAD, 0xB5) }))
 }
 pub fn text_primary() -> Color32 {
-    if is_dark() { Color32::from_rgb(0xEC, 0xE9, 0xF3) } else { Color32::from_rgb(0x1D, 0x1D, 0x1F) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.text_primary).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0xEC, 0xE9, 0xF3) } else { Color32::from_rgb(0x1D, 0x1D, 0x1F) }))
 }
 pub fn text_secondary() -> Color32 {
-    if is_dark() { Color32::from_rgb(0xB4, 0xAD, 0xC4) } else { Color32::from_rgb(0x38, 0x38, 0x3D) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.text_secondary).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0xB4, 0xAD, 0xC4) } else { Color32::from_rgb(0x38, 0x38, 0x3D) }))
 }
 pub fn text_tertiary() -> Color32 {
-    if is_dark() { Color32::from_rgb(0x77, 0x6F, 0x88) } else { Color32::from_rgb(0x58, 0x58, 0x60) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.text_tertiary).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0x77, 0x6F, 0x88) } else { Color32::from_rgb(0x58, 0x58, 0x60) }))
 }
 pub fn text_inverse() -> Color32 {
-    if is_dark() { Color32::from_rgb(0x12, 0x10, 0x18) } else { Color32::from_rgb(0xFF, 0xFF, 0xFF) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.text_inverse).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0x12, 0x10, 0x18) } else { Color32::from_rgb(0xFF, 0xFF, 0xFF) }))
 }
 pub fn accent() -> Color32 {
-    if is_dark() { Color32::from_rgb(0xA7, 0x78, 0xF2) } else { Color32::from_rgb(0x8C, 0x52, 0xFF) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.accent).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0xA7, 0x78, 0xF2) } else { Color32::from_rgb(0x8C, 0x52, 0xFF) }))
 }
 pub fn accent_hover() -> Color32 {
-    if is_dark() { Color32::from_rgb(0xB8, 0x8F, 0xFF) } else { Color32::from_rgb(0x72, 0x37, 0xE6) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.accent_hover).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0xB8, 0x8F, 0xFF) } else { Color32::from_rgb(0x72, 0x37, 0xE6) }))
 }
 pub fn accent_muted() -> Color32 {
-    if is_dark() { Color32::from_rgb(0x4F, 0x39, 0x73) } else { Color32::from_rgb(0xDF, 0xD1, 0xF7) }
+    ACTIVE_COLORS.with(|c| c.borrow().as_ref().map(|p| p.accent_muted).unwrap_or_else(|| if is_dark() { Color32::from_rgb(0x4F, 0x39, 0x73) } else { Color32::from_rgb(0xDF, 0xD1, 0xF7) }))
 }

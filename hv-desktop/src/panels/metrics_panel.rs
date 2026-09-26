@@ -44,7 +44,6 @@ pub fn show_events(ui: &mut Ui, _app: &mut HvBibleApp) {
     ] {
         ui.label(
             egui::RichText::new(item)
-                .size(12.0)
                 .monospace()
                 .color(crate::theme::text_secondary()),
         );
@@ -57,10 +56,10 @@ fn metric(ui: &mut Ui, label: &str, value: &str) {
         .stroke(egui::Stroke::new(1.0, crate::theme::border_subtle()))
         .inner_margin(egui::Margin::symmetric(8.0, 7.0))
         .show(ui, |ui| {
-            ui.label(egui::RichText::new(label).size(10.0).color(crate::theme::text_secondary()));
+            ui.label(egui::RichText::new(label).small().color(crate::theme::text_secondary()));
             ui.colored_label(
                 STATUS_SUCCESS,
-                egui::RichText::new(value).size(16.0).strong(),
+                egui::RichText::new(value).strong(),
             );
         });
 }

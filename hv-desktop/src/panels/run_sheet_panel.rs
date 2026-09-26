@@ -8,11 +8,10 @@ use crate::theme::{
 
 pub fn show(ui: &mut Ui, _app: &mut HvBibleApp) {
     ui.horizontal(|ui| {
-        ui.label(
+        ui.heading(
             egui::RichText::new("RUN OF SERVICE")
-                .size(13.0)
-                .strong()
-                .color(crate::theme::text_primary()),
+                .color(crate::theme::accent())
+                .strong(),
         );
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             let _ = ui.button("Import");
@@ -30,20 +29,19 @@ pub fn show(ui: &mut Ui, _app: &mut HvBibleApp) {
                     ui.horizontal(|ui| {
                         ui.label(
                             egui::RichText::new(block.time)
-                                .size(11.0)
+                                .small()
                                 .monospace()
                                 .color(crate::theme::text_secondary()),
                         );
                         ui.vertical(|ui| {
                             ui.label(
                                 egui::RichText::new(block.title)
-                                    .size(12.0)
                                     .strong()
                                     .color(crate::theme::text_primary()),
                             );
                             ui.label(
                                 egui::RichText::new(block.detail)
-                                    .size(11.0)
+                                    .small()
                                     .color(crate::theme::text_secondary()),
                             );
                         });
@@ -64,11 +62,10 @@ pub fn show(ui: &mut Ui, _app: &mut HvBibleApp) {
 
 pub fn show_detected(ui: &mut Ui, _app: &mut HvBibleApp) {
     ui.horizontal(|ui| {
-        ui.label(
+        ui.heading(
             egui::RichText::new("DETECTED REFERENCES")
-                .size(13.0)
-                .strong()
-                .color(crate::theme::text_primary()),
+                .color(crate::theme::accent())
+                .strong(),
         );
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             ui.colored_label(crate::theme::accent(), "Review queue");
@@ -85,7 +82,6 @@ pub fn show_detected(ui: &mut Ui, _app: &mut HvBibleApp) {
                     ui.vertical(|ui| {
                         ui.label(
                             egui::RichText::new(item.reference)
-                                .size(12.0)
                                 .strong()
                                 .color(crate::theme::text_primary()),
                         );
@@ -94,7 +90,7 @@ pub fn show_detected(ui: &mut Ui, _app: &mut HvBibleApp) {
                                 "{} | {}% confidence",
                                 item.source, item.confidence
                             ))
-                            .size(11.0)
+                            .small()
                             .color(crate::theme::text_secondary()),
                         );
                     });
@@ -102,7 +98,7 @@ pub fn show_detected(ui: &mut Ui, _app: &mut HvBibleApp) {
                         let _ = ui.button("Push");
                         ui.label(
                             egui::RichText::new(item.state)
-                                .size(11.0)
+                                .small()
                                 .color(crate::theme::text_secondary()),
                         );
                     });

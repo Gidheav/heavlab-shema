@@ -16,14 +16,14 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
     ui.horizontal_wrapped(|ui| {
         ui.label(
             egui::RichText::new(status_text)
-                .size(13.0)
+                .heading()
                 .strong()
                 .color(status_color),
         );
         ui.add_space(8.0);
         ui.label(
             egui::RichText::new(format!("{:.0}% confidence", vad.confidence * 100.0))
-                .size(11.0)
+                .small()
                 .color(crate::theme::text_secondary()),
         );
     });
@@ -51,7 +51,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
     ui.horizontal(|ui| {
         ui.label(
             egui::RichText::new("Sensitivity")
-                .size(11.0)
+                .small()
                 .color(crate::theme::text_secondary()),
         );
         let w = (ui.available_width() - 50.0).clamp(30.0, 400.0);
@@ -81,13 +81,13 @@ fn param_badge(ui: &mut Ui, label: &str, value: &str) {
             ui.horizontal(|ui| {
                 ui.label(
                     egui::RichText::new(label)
-                        .size(10.0)
+                        .small()
                         .color(crate::theme::text_secondary()),
                 );
                 ui.add_space(2.0);
                 ui.label(
                     egui::RichText::new(value)
-                        .size(10.0)
+                        .small()
                         .strong()
                         .monospace()
                         .color(crate::theme::text_primary()),

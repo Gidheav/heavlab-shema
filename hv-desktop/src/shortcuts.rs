@@ -1,4 +1,5 @@
 //! Keyboard shortcuts for the broadcast operator.
+//! Zoom: ui_scale is a text-only multiplier (0.5–2.0). Geometry is unaffected.
 
 use eframe::egui::{Context, Key};
 
@@ -33,6 +34,28 @@ pub fn handle(ctx: &Context, app: &mut HvBibleApp) {
         if input.key_pressed(Key::F11) {
             app.program_out = !app.program_out;
         }
+
+        // ── Zoom: Ctrl+= zoom in · Ctrl+- zoom out · Ctrl+0 reset ────────────
+        // ui_scale is a pure text multiplier; geometry panels stay fixed.
+        // Range: 0.5× (tiny) → 2.0× (large). Steps of 0.1×.
+        if ctrl && (input.key_pressed(Key::Equals) || input.key_pressed(Key::Plus)) {
+            let s = (app.current_theme.font_config.ui_scale + 0.1).min(2.0);
+            app.current_theme.font_config.ui_scale = (s * 10.0).round() / 10.0;
+            app.config.font_config = Some(app.current_theme.font_config.clone());
+            let _ = app.config.save();
+        }
+        if ctrl && input.key_pressed(Key::Minus) {
+            let s = (app.current_theme.font_config.ui_scale - 0.1).max(0.5);
+            app.current_theme.font_config.ui_scale = (s * 10.0).round() / 10.0;
+            app.config.font_config = Some(app.current_theme.font_config.clone());
+            let _ = app.config.save();
+        }
+        if ctrl && input.key_pressed(Key::Num0) {
+            app.current_theme.font_config.ui_scale = 1.0;
+            app.config.font_config = Some(app.current_theme.font_config.clone());
+            let _ = app.config.save();
+        }
+        // ─────────────────────────────────────────────────────────────────────
 
         if ctrl {
             let slot = if input.key_pressed(Key::Num1) {

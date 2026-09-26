@@ -128,7 +128,10 @@ impl HvBibleApp {
             "follow_system" => ThemeMode::FollowSystem,
             _ => ThemeMode::Dark,
         };
-        let current_theme = Theme::new(config.theme_id.clone(), theme_mode);
+        let mut current_theme = Theme::new(config.theme_id.clone(), theme_mode);
+        if let Some(font_config) = config.font_config.clone() {
+            current_theme.font_config = font_config;
+        }
         
         // Apply initial theme
         if let Some(definition) = theme_registry.get(&current_theme.id) {
@@ -438,7 +441,27 @@ impl HvBibleApp {
 
 impl eframe::App for HvBibleApp {
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
-        theme::apply_visuals(ctx, self.dark_mode);
+        if let Some(definition) = self.theme_registry.get(&self.current_theme.id) {
+            self.current_theme.apply(ctx, definition);
+        } else {
+            theme::apply_visuals(ctx, self.dark_mode);
+        }
+
+        // ── Single unified zoom system ──────────────────────────────────────
+        // set_zoom_factor natively scales egui's entire geometry (panels, paddings).
+        // text_styles are derived from base_size. They scale automatically
+        // because set_zoom_factor multiplies the final render size.
+        let zoom = self.current_theme.font_config.ui_scale.clamp(0.5, 2.0);
+        ctx.set_zoom_factor(zoom);
+
+        let base_px = self.current_theme.font_config.size.to_pixels();
+        let mut style = (*ctx.style()).clone();
+        style.text_styles.insert(eframe::egui::TextStyle::Body,     eframe::egui::FontId::proportional(base_px));
+        style.text_styles.insert(eframe::egui::TextStyle::Button,   eframe::egui::FontId::proportional(base_px));
+        style.text_styles.insert(eframe::egui::TextStyle::Small,    eframe::egui::FontId::proportional(base_px * 0.85));
+        style.text_styles.insert(eframe::egui::TextStyle::Monospace, eframe::egui::FontId::monospace(base_px * 0.9));
+        style.text_styles.insert(eframe::egui::TextStyle::Heading,  eframe::egui::FontId::proportional(base_px * 1.25));
+        ctx.set_style(style);
         self.poll_events();
         shortcuts::handle(ctx, self);
         self.tick_animation(ctx);

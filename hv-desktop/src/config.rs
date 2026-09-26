@@ -37,6 +37,8 @@ pub struct AppConfig {
     pub theme_id: String,
     #[serde(default)]
     pub theme_mode: String, // "dark", "light", "follow_system"
+    #[serde(default)]
+    pub font_config: Option<crate::theme::FontConfig>,
 }
 
 impl Default for AppConfig {
@@ -67,6 +69,7 @@ impl Default for AppConfig {
             layout_state: LayoutState::default(),
             theme_id: "purple_graphite_dark".to_string(),
             theme_mode: "dark".to_string(),
+            font_config: None,
         }
     }
 }

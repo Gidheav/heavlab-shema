@@ -112,8 +112,9 @@ impl Theme {
         visuals.widgets.hovered.fg_stroke.color = tp;
         visuals.widgets.active.fg_stroke.color = tp;
 
-        // Update dark mode state
+        // Update dark mode state and thread-local colors
         super::IS_DARK_MODE.store(matches!(self.mode, ThemeMode::Dark), std::sync::atomic::Ordering::Relaxed);
+        super::set_active_colors(colors);
 
         ctx.set_visuals(visuals);
     }

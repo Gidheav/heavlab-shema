@@ -48,55 +48,18 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
                 input_source::show(ui, app);
             });
 
-            // ── CHANNEL ROUTING ───────────────────────────────────────────
-            section(ui, "⇄  CHANNEL ROUTING", true, |ui| {
-                routing::show(ui, app);
-            });
 
             // ── INPUT LEVELS ──────────────────────────────────────────────
             section(ui, "📊  INPUT LEVEL", true, |ui| {
                 levels::show(ui, app);
             });
 
-            // ── GAIN STAGING ──────────────────────────────────────────────
-            section(ui, "🎚  GAIN STAGING", true, |ui| {
-                gain::show(ui, app);
-            });
-
-            // ── PROCESSING CHAIN ──────────────────────────────────────────
-            section(ui, "⚙  PROCESSING CHAIN", true, |ui| {
-                processing::show(ui, app);
-            });
 
             // ── VOICE DETECTION ───────────────────────────────────────────
             section(ui, "🎤  VOICE DETECTION", true, |ui| {
                 vad::show(ui, app);
             });
 
-            // ── MONITORING ────────────────────────────────────────────────
-            section(ui, "🎧  MONITORING", true, |ui| {
-                monitoring::show(ui, app);
-            });
-
-            // ── RECORDING ─────────────────────────────────────────────────
-            section(ui, "⏺  RECORDING", true, |ui| {
-                recording::show(ui, app);
-            });
-
-            // ── PRESETS ───────────────────────────────────────────────────
-            section(ui, "💾  PRESETS", false, |ui| {
-                presets::show(ui, app);
-            });
-
-            // ── LED STATUS ────────────────────────────────────────────────
-            section(ui, "💡  LED STATUS", false, |ui| {
-                led::show(ui, app);
-            });
-
-            // ── DIAGNOSTICS ───────────────────────────────────────────────
-            section(ui, "🔬  DIAGNOSTICS", false, |ui| {
-                diagnostics::show(ui, app);
-            });
 
                 });
             });
@@ -115,7 +78,6 @@ fn panel_header(ui: &mut Ui, app: &mut HvBibleApp) {
                 // Title
                 ui.label(
                     egui::RichText::new("AUDIO CONSOLE")
-                        .size(12.0)
                         .strong()
                         .color(crate::theme::accent()),
                 );
@@ -132,7 +94,7 @@ fn panel_header(ui: &mut Ui, app: &mut HvBibleApp) {
 
                 ui.label(
                     egui::RichText::new(app.status_label())
-                        .size(11.0)
+                        .small()
                         .color(dot_color),
                 );
 
@@ -153,7 +115,7 @@ fn panel_header(ui: &mut Ui, app: &mut HvBibleApp) {
                 let d = &app.audio_mock.device;
                 ui.label(
                     egui::RichText::new(&d.name)
-                        .size(11.0)
+                        .small()
                         .color(crate::theme::text_primary()),
                 );
                 ui.add_space(4.0);
@@ -166,7 +128,7 @@ fn panel_header(ui: &mut Ui, app: &mut HvBibleApp) {
                         d.buffer_size,
                         d.buffer_latency_ms
                     ))
-                    .size(10.0)
+                    .small()
                     .color(crate::theme::text_secondary()),
                 );
             });
@@ -214,12 +176,12 @@ fn status_strip(ui: &mut Ui, app: &HvBibleApp) {
                     ui.add_space(8.0);
                     ui.label(
                         egui::RichText::new("⏱")
-                            .size(10.0)
+                            .small()
                             .color(crate::theme::text_tertiary()),
                     );
                     ui.label(
                         egui::RichText::new(&app.audio_mock.diagnostics.uptime)
-                            .size(10.0)
+                            .small()
                             .monospace()
                             .color(crate::theme::text_secondary()),
                     );
@@ -241,12 +203,12 @@ fn status_chip(ui: &mut Ui, label: &str, active: bool, active_color: Color32) {
         .rounding(3.0)
         .inner_margin(egui::Margin::symmetric(6.0, 2.0))
         .show(ui, |ui| {
-            ui.label(egui::RichText::new(label).size(10.0).strong().color(color));
+            ui.label(egui::RichText::new(label).small().strong().color(color));
         });
 }
 
 fn status_chip_colored(ui: &mut Ui, label: &str, color: Color32) {
-    ui.label(egui::RichText::new(label).size(10.0).monospace().color(color));
+    ui.label(egui::RichText::new(label).small().monospace().color(color));
 }
 
 // ── Collapsible section wrapper ─────────────────────────────────────────────
@@ -265,12 +227,12 @@ fn section(ui: &mut Ui, title: &str, default_open: bool, body: impl FnOnce(&mut 
                 let arrow = if open { "▾" } else { "▸" };
                 ui.label(
                     egui::RichText::new(arrow)
-                        .size(10.0)
+                        .small()
                         .color(crate::theme::text_secondary()),
                 );
                 ui.label(
                     egui::RichText::new(title)
-                        .size(11.0)
+                        .small()
                         .strong()
                         .color(crate::theme::text_primary()),
                 );
@@ -314,7 +276,6 @@ fn transport_bar(ui: &mut Ui, app: &mut HvBibleApp) {
                     .add(
                         egui::Button::new(
                             egui::RichText::new(icon)
-                                .size(12.0)
                                 .strong()
                                 .color(crate::theme::text_inverse()),
                         )
@@ -333,7 +294,6 @@ fn transport_bar(ui: &mut Ui, app: &mut HvBibleApp) {
                         .add(
                             egui::Button::new(
                                 egui::RichText::new("⏹  Stop")
-                                    .size(12.0)
                                     .strong()
                                     .color(crate::theme::text_inverse()),
                             )
@@ -360,7 +320,7 @@ fn transport_bar(ui: &mut Ui, app: &mut HvBibleApp) {
                     .add(
                         egui::Button::new(
                             egui::RichText::new(mute_label)
-                                .size(11.0)
+                                .small()
                                 .color(crate::theme::text_primary()),
                         )
                         .fill(mute_fill)
@@ -385,7 +345,7 @@ fn transport_bar(ui: &mut Ui, app: &mut HvBibleApp) {
                     .add(
                         egui::Button::new(
                             egui::RichText::new(rec_label)
-                                .size(11.0)
+                                .small()
                                 .color(if rec {
                                     crate::theme::text_inverse()
                                 } else {
@@ -404,7 +364,6 @@ fn transport_bar(ui: &mut Ui, app: &mut HvBibleApp) {
                     ui.add_space(6.0);
                     ui.label(
                         egui::RichText::new(&app.audio_mock.recording.elapsed)
-                            .size(12.0)
                             .monospace()
                             .color(crate::theme::STATUS_ERROR),
                     );
@@ -417,7 +376,7 @@ fn transport_bar(ui: &mut Ui, app: &mut HvBibleApp) {
 
 pub(super) fn icon_btn(ui: &mut Ui, icon: &str, tooltip: &str) -> egui::Response {
     ui.add(
-        egui::Button::new(egui::RichText::new(icon).size(11.0))
+        egui::Button::new(egui::RichText::new(icon).small())
             .fill(Color32::TRANSPARENT)
             .min_size(egui::vec2(22.0, 22.0))
             .stroke(Stroke::NONE),
@@ -431,13 +390,13 @@ pub(super) fn data_row(ui: &mut Ui, label: &str, value: impl Into<String>) {
         ui.set_min_width(ui.available_width());
         ui.label(
             egui::RichText::new(label)
-                .size(11.0)
+                .small()
                 .color(crate::theme::text_secondary()),
         );
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             ui.label(
                 egui::RichText::new(value.into())
-                    .size(11.0)
+                    .small()
                     .monospace()
                     .color(crate::theme::text_primary()),
             );
@@ -452,7 +411,7 @@ pub(super) fn bar(ui: &mut Ui, label: &str, value: f32, readout: String) {
             egui::vec2(label_width, 10.0),
             egui::Label::new(
                 egui::RichText::new(label)
-                    .size(11.0)
+                    .small()
                     .color(crate::theme::text_secondary())
             ),
         );
@@ -461,7 +420,7 @@ pub(super) fn bar(ui: &mut Ui, label: &str, value: f32, readout: String) {
             .show_percentage();
         // Custom readout formatting
         let text = egui::RichText::new(readout)
-            .size(11.0)
+            .small()
             .monospace()
             .color(crate::theme::text_primary());
         
@@ -481,7 +440,7 @@ pub(super) fn labeled_slider(ui: &mut Ui, label: &str, value: &mut f32, min: f32
             egui::vec2(label_width, 18.0),
             egui::Label::new(
                 egui::RichText::new(label)
-                    .size(11.0)
+                    .small()
                     .color(crate::theme::text_secondary()),
             ),
         );
@@ -492,7 +451,7 @@ pub(super) fn labeled_slider(ui: &mut Ui, label: &str, value: &mut f32, min: f32
         );
         ui.label(
             egui::RichText::new(format!("{:+.1} {}", *value, unit))
-                .size(11.0)
+                .small()
                 .monospace()
                 .color(crate::theme::text_primary()),
         );
@@ -501,7 +460,7 @@ pub(super) fn labeled_slider(ui: &mut Ui, label: &str, value: &mut f32, min: f32
 
 pub(super) fn small_tool(ui: &mut Ui, label: &str, tooltip: &str) -> egui::Response {
     ui.add(
-        egui::Button::new(egui::RichText::new(label).size(10.0))
+        egui::Button::new(egui::RichText::new(label).small())
             .min_size(egui::vec2(28.0, 22.0))
             .stroke(egui::Stroke::new(1.0, crate::theme::border_subtle())),
     )

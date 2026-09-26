@@ -21,7 +21,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
         ui.add_space(20.0);
         ui.label(
             egui::RichText::new("  -48")
-                .size(9.0)
+                .small()
                 .monospace()
                 .color(crate::theme::text_tertiary()),
         );
@@ -30,7 +30,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
                 ui.add_space(20.0);
                 ui.label(
                     egui::RichText::new(tick)
-                        .size(9.0)
+                        .small()
                         .monospace()
                         .color(crate::theme::text_tertiary()),
                 );
@@ -58,7 +58,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
     ui.horizontal_wrapped(|ui| {
         ui.label(
             egui::RichText::new("Hold")
-                .size(11.0)
+                .small()
                 .color(crate::theme::text_secondary()),
         );
         let hold_width = (ui.available_width() - 8.0).clamp(50.0, 56.0);
@@ -77,7 +77,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
 
         ui.label(
             egui::RichText::new("Mode")
-                .size(11.0)
+                .small()
                 .color(crate::theme::text_secondary()),
         );
         let mode_width = (ui.available_width() - 8.0).clamp(60.0, 70.0);
@@ -99,7 +99,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
             .add(
                 egui::Button::new(
                     egui::RichText::new("Reset Peak")
-                        .size(11.0)
+                        .small()
                         .color(crate::theme::text_primary()),
                 )
                 .fill(crate::theme::bg_surface_sunken()),
@@ -111,7 +111,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
                 .add(
                     egui::Button::new(
                         egui::RichText::new("Clear Clip")
-                            .size(11.0)
+                            .small()
                             .color(crate::theme::text_inverse()),
                     )
                     .fill(crate::theme::STATUS_ERROR),
@@ -127,7 +127,7 @@ fn meter_row(ui: &mut Ui, ch: &str, value: f32, peak: f32, clip: bool) {
         ui.set_min_width(ui.available_width());
         ui.label(
             egui::RichText::new(ch)
-                .size(11.0)
+                .small()
                 .strong()
                 .color(crate::theme::text_secondary()),
         );
@@ -135,7 +135,7 @@ fn meter_row(ui: &mut Ui, ch: &str, value: f32, peak: f32, clip: bool) {
         MeterBar::new(value, peak, clip).show_width(ui, meter_width);
         ui.label(
             egui::RichText::new(format!("{:>6.1} dB", value))
-                .size(11.0)
+                .small()
                 .monospace()
                 .color(crate::theme::text_primary()),
         );
