@@ -21,9 +21,8 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp, density: ColumnDensity) {
             density,
         }
         .show(ui);
-        if density.shows_labels() {
-            ui.add_space(density.row_gap());
-        }
+        // `row_gap` is already zero in icon-only mode, so no guard is needed.
+        ui.add_space(density.row_gap());
     }
 
     if density.shows_labels() {
@@ -32,8 +31,9 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp, density: ColumnDensity) {
 
     if density.shows_secondary() {
         ui.add_space(density.row_gap());
-        readout(ui, "LUFS", &format!("{:.1}", app.audio_mock.level.lufs));
-        readout(ui, "Meter", &app.audio_mock.level.meter_mode.clone());
+        let level = &app.audio_mock.level;
+        readout(ui, "LUFS", &format!("{:.1}", level.lufs));
+        readout(ui, "Meter", &level.meter_mode);
     }
 
     // The clip lights latch, so they need a way out. Offering it only when
