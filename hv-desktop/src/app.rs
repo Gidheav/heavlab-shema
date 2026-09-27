@@ -183,6 +183,25 @@ impl HvBibleApp {
         }
     }
 
+    /// Linear capture gain expressed in decibels (0 dB = unity).
+    /// `gain` is a multiplier; the UI and the config file both speak dB.
+    pub fn gain_db(&self) -> f32 {
+        if self.gain <= f32::EPSILON {
+            -60.0
+        } else {
+            (20.0 * self.gain.log10()).clamp(-60.0, 24.0)
+        }
+    }
+
+    /// Apply a decibels value to the linear capture gain and forward it to the
+    /// pipeline. Clamped to the -60 dB .. +24 dB capture range.
+    pub fn set_gain_db(&mut self, db: f32) {
+        let db = db.clamp(-60.0, 24.0);
+        self.gain = 10.0_f32.powf(db / 20.0);
+        self.pipeline
+            .send_command(hv_pipeline::PipelineCommand::SetGain(self.gain));
+    }
+
     pub fn toggle_listening(&mut self) {
         self.is_listening = !self.is_listening;
         if self.is_listening {
@@ -404,7 +423,7 @@ impl HvBibleApp {
         self.audio_mock.level.snr_db = self.snr_db;
         self.audio_mock.vad.status = self.vad_label().to_string();
         self.audio_mock.vad.confidence = self.asr_confidence.max(0.90);
-        self.audio_mock.gain.input_gain_db = self.gain;
+        self.audio_mock.gain.input_gain_db = self.gain_db();
         self.audio_mock.led.status = self.status_label().to_string();
     }
 

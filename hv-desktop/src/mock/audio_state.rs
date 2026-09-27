@@ -1,24 +1,9 @@
-pub const AUDIO_SECTION_IDS: [&str; 11] = [
-    "Input Source",
-    "Routing Matrix",
-    "Input Level",
-    "Gain Staging",
-    "Processing Chain",
-    "Voice Detection",
-    "Monitoring",
-    "Recording",
-    "Presets",
-    "LED Status",
-    "Diagnostics",
-];
-
 #[derive(Debug, Clone)]
 pub struct AudioControlState {
     pub device: AudioDeviceState,
     pub routing: RoutingState,
     pub level: LevelState,
     pub gain: GainState,
-    pub processing: ProcessingState,
     pub vad: VadState,
     pub monitoring: MonitoringState,
     pub recording: RecordingState,
@@ -69,16 +54,6 @@ impl AudioControlState {
             gain: GainState {
                 input_gain_db: 2.0,
                 digital_trim_db: 0.0,
-                hpf_enabled: true,
-                hpf_frequency: "80 Hz".to_string(),
-                hpf_slope: "12 dB/oct".to_string(),
-            },
-            processing: ProcessingState {
-                agc: ProcessorRow::enabled("AGC", "Target -18 dB", "Attack 10 ms"),
-                gate: ProcessorRow::disabled("Gate", "Threshold -45 dB", "Hold 50 ms"),
-                aec: ProcessorRow::enabled("AEC", "Strength Medium", "Echo return -31 dB"),
-                compressor: ProcessorRow::disabled("Compressor", "Ratio 3:1", "Threshold -20 dB"),
-                limiter: ProcessorRow::enabled("Limiter", "Ceiling -1 dB", "Release 80 ms"),
             },
             vad: VadState {
                 status: "Active".to_string(),
@@ -121,10 +96,6 @@ impl AudioControlState {
                 watchdog: "Healthy".to_string(),
             },
         }
-    }
-
-    pub fn sections(&self) -> &'static [&'static str] {
-        &AUDIO_SECTION_IDS
     }
 }
 
@@ -170,46 +141,6 @@ pub struct LevelState {
 pub struct GainState {
     pub input_gain_db: f32,
     pub digital_trim_db: f32,
-    pub hpf_enabled: bool,
-    pub hpf_frequency: String,
-    pub hpf_slope: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct ProcessingState {
-    pub agc: ProcessorRow,
-    pub gate: ProcessorRow,
-    pub aec: ProcessorRow,
-    pub compressor: ProcessorRow,
-    pub limiter: ProcessorRow,
-}
-
-#[derive(Debug, Clone)]
-pub struct ProcessorRow {
-    pub name: String,
-    pub enabled: bool,
-    pub primary: String,
-    pub secondary: String,
-}
-
-impl ProcessorRow {
-    fn enabled(name: &str, primary: &str, secondary: &str) -> Self {
-        Self {
-            name: name.to_string(),
-            enabled: true,
-            primary: primary.to_string(),
-            secondary: secondary.to_string(),
-        }
-    }
-
-    fn disabled(name: &str, primary: &str, secondary: &str) -> Self {
-        Self {
-            name: name.to_string(),
-            enabled: false,
-            primary: primary.to_string(),
-            secondary: secondary.to_string(),
-        }
-    }
 }
 
 #[derive(Debug, Clone)]

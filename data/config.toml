@@ -1,8 +1,8 @@
 audio_device = "Microphone Array (Realtek(R) Audio)"
-gain = 1.0
+gain = 0.10000000149011612
 translation = "NIV"
-window_width = 1536.0
-window_height = 816.0
+window_width = 159.1999969482422
+window_height = 27.200000762939453
 dark_mode = true
 asr_mode = "sherpa"
 asr_model_size = "medium"
@@ -20,19 +20,19 @@ num_threads = 0
 hotwords_enabled = false
 beam_size = 4
 calibration_done = false
-theme_id = "golden_hour"
+theme_id = "ocean_blue"
 theme_mode = ""
 
 [layoutState]
-leftCollapsed = true
+leftCollapsed = false
 leftWidth = 200.0
 rightCollapsed = false
-rightWidth = 384.0
-middleBottomCollapsed = true
+rightWidth = 200.0
+middleBottomCollapsed = false
 middleBottomHeight = 80.0
 ribbonCollapsed = false
 settingsOpen = false
-settingsTab = 0
+settingsTab = 1
 
 [font_config]
 family = "Roboto"

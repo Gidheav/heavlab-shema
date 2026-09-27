@@ -94,10 +94,7 @@ fn toggle_btn(ui: &mut Ui, label: &str, active: &mut bool) {
         crate::theme::text_primary()
     };
     if ui
-        .add(
-            egui::Button::new(egui::RichText::new(label).size(11.0).color(text_color))
-                .fill(fill),
-        )
+        .add(egui::Button::new(egui::RichText::new(label).size(11.0).color(text_color)).fill(fill))
         .clicked()
     {
         *active = !*active;

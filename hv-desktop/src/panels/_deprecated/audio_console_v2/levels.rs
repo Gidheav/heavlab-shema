@@ -86,11 +86,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
             .width(mode_width)
             .show_ui(ui, |ui| {
                 for m in ["RMS", "Peak", "VU", "LUFS-M", "LUFS-S"] {
-                    ui.selectable_value(
-                        &mut app.audio_mock.level.meter_mode,
-                        m.to_string(),
-                        m,
-                    );
+                    ui.selectable_value(&mut app.audio_mock.level.meter_mode, m.to_string(), m);
                 }
             });
 

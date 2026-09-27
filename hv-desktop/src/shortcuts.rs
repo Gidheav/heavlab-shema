@@ -38,17 +38,28 @@ pub fn handle(ctx: &Context, app: &mut HvBibleApp) {
         // ── Zoom: Ctrl+= zoom in · Ctrl+- zoom out · Ctrl+0 reset ────────────
         // ui_scale is a pure text multiplier; geometry panels stay fixed.
         // Range: 0.5× (tiny) → 2.0× (large). Steps of 0.1×.
+        // At min/max, further key presses do nothing (no bounce).
+        const ZOOM_MIN: f32 = 0.5;
+        const ZOOM_MAX: f32 = 2.0;
+        const ZOOM_STEP: f32 = 0.1;
+
         if ctrl && (input.key_pressed(Key::Equals) || input.key_pressed(Key::Plus)) {
-            let s = (app.current_theme.font_config.ui_scale + 0.1).min(2.0);
-            app.current_theme.font_config.ui_scale = (s * 10.0).round() / 10.0;
-            app.config.font_config = Some(app.current_theme.font_config.clone());
-            let _ = app.config.save();
+            let current = app.current_theme.font_config.ui_scale;
+            if current < ZOOM_MAX {
+                let s = (current + ZOOM_STEP).min(ZOOM_MAX);
+                app.current_theme.font_config.ui_scale = (s * 10.0).round() / 10.0;
+                app.config.font_config = Some(app.current_theme.font_config.clone());
+                let _ = app.config.save();
+            }
         }
         if ctrl && input.key_pressed(Key::Minus) {
-            let s = (app.current_theme.font_config.ui_scale - 0.1).max(0.5);
-            app.current_theme.font_config.ui_scale = (s * 10.0).round() / 10.0;
-            app.config.font_config = Some(app.current_theme.font_config.clone());
-            let _ = app.config.save();
+            let current = app.current_theme.font_config.ui_scale;
+            if current > ZOOM_MIN {
+                let s = (current - ZOOM_STEP).max(ZOOM_MIN);
+                app.current_theme.font_config.ui_scale = (s * 10.0).round() / 10.0;
+                app.config.font_config = Some(app.current_theme.font_config.clone());
+                let _ = app.config.save();
+            }
         }
         if ctrl && input.key_pressed(Key::Num0) {
             app.current_theme.font_config.ui_scale = 1.0;

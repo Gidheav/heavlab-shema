@@ -17,6 +17,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 pub static IS_DARK_MODE: AtomicBool = AtomicBool::new(true);
 
+/// Display name of the default (Purple Graphite) theme family.
+#[allow(dead_code)] // Asserted by the UI contract tests in `main.rs`.
+pub const THEME_NAME: &str = "Purple Graphite";
+
 use std::cell::RefCell;
 thread_local! {
     static ACTIVE_COLORS: RefCell<Option<ColorPalette32>> = RefCell::new(None);

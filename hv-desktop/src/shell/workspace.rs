@@ -521,6 +521,7 @@ mod tests {
             middle_bottom_collapsed: false,
             middle_bottom_height: 700.0,
             ribbon_collapsed: false,
+            ..LayoutState::default()
         };
 
         super::clamp_layout_state(&mut state, 1600.0, 900.0);
@@ -540,6 +541,7 @@ mod tests {
             middle_bottom_collapsed: true,
             middle_bottom_height: 172.0,
             ribbon_collapsed: true,
+            ..LayoutState::default()
         };
 
         super::clamp_layout_state(&mut state, 1200.0, 700.0);

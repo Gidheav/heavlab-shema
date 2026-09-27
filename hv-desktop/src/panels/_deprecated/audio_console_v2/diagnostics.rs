@@ -8,9 +8,17 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
 
     ui.columns(2, |cols| {
         data_row(&mut cols[0], "CPU Usage", format!("{}%", d.cpu_percent));
-        data_row(&mut cols[0], "Thread Jitter", format!("{:.1} ms", d.jitter_ms));
+        data_row(
+            &mut cols[0],
+            "Thread Jitter",
+            format!("{:.1} ms", d.jitter_ms),
+        );
         data_row(&mut cols[0], "Dropped Frames", d.dropped_frames.to_string());
-        data_row(&mut cols[1], "Last Buffer", format!("{:.1} ms", d.last_buffer_ms));
+        data_row(
+            &mut cols[1],
+            "Last Buffer",
+            format!("{:.1} ms", d.last_buffer_ms),
+        );
         data_row(&mut cols[1], "ASR Queue", d.asr_queue.to_string());
         data_row(&mut cols[1], "Uptime", d.uptime.clone());
     });

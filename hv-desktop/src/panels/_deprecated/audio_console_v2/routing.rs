@@ -20,11 +20,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
             .width(input_width)
             .show_ui(&mut cols[0], |ui| {
                 for item in ["Mono", "Stereo", "Channel 1", "Channel 2", "Channel 1+2"] {
-                    ui.selectable_value(
-                        &mut app.audio_mock.routing.input,
-                        item.to_string(),
-                        item,
-                    );
+                    ui.selectable_value(&mut app.audio_mock.routing.input, item.to_string(), item);
                 }
             });
 
@@ -57,7 +53,11 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
             &format!("Ch {}", ch.id),
             format!(
                 "{}  {:.1} dB",
-                if ch.active { "● Active" } else { "○ Silent" },
+                if ch.active {
+                    "● Active"
+                } else {
+                    "○ Silent"
+                },
                 ch.peak_db
             ),
         );

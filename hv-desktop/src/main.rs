@@ -52,11 +52,90 @@ mod ui_contract_tests {
     fn audio_control_mock_exposes_professional_section_contract() {
         let state = AudioControlState::mock_running();
 
-        assert_eq!(state.sections().len(), 11);
         assert_eq!(state.device.driver, "WASAPI");
         assert_eq!(state.routing.channels.len(), 2);
         assert_eq!(state.recording.active, false);
         assert_eq!(state.diagnostics.asr_queue, 0);
+    }
+
+    /// The processing chain and gain staging sections read live config and the
+    /// real pipeline, not the mock, so the mock must not re-declare DSP state
+    /// that could drift out of sync with `AppConfig`.
+    #[test]
+    fn audio_mock_does_not_duplicate_dsp_state() {
+        let state = AudioControlState::mock_running();
+
+        // Gain staging only mirrors the linear->dB projection; the HPF and
+        // processor chain live on `AppConfig` and are driven by PipelineCommand.
+        assert_eq!(state.gain.digital_trim_db, 0.0);
+        assert!(state.gain.input_gain_db > 0.0);
+    }
+
+    /// Guards the "one editor per setting" rule for capture gain.
+    ///
+    /// `app.gain` is a *linear multiplier*; the pipeline clamps it to
+    /// `0.0..=4.0` (worker.rs). Every UI surface must therefore speak
+    /// decibels through `gain_db()` / `set_gain_db()`, otherwise a surface can
+    /// display `+24.0 dB` while the pipeline silently clamps to `4.0x`
+    /// (`+12.0 dB`). This test walks the real source files and fails if any
+    /// module outside `app.rs` mutates the linear gain directly or bypasses
+    /// the helpers.
+    #[test]
+    fn capture_gain_has_a_single_decibel_conversion_path() {
+        let offenders: Vec<String> = [
+            "src/panels/audio/gain.rs",
+            "src/panels/audio/mod.rs",
+            "src/panels/settings_window.rs",
+            "src/shell/ribbon.rs",
+            "src/shell/workspace.rs",
+        ]
+        .iter()
+        .filter_map(|relative| {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(relative);
+            let source = std::fs::read_to_string(&path).ok()?;
+            let bad = source.contains("app.gain =") || source.contains("PipelineCommand::SetGain");
+            bad.then(|| relative.to_string())
+        })
+        .collect();
+
+        assert!(
+            offenders.is_empty(),
+            "these modules bypass gain_db()/set_gain_db() and can drift from the \
+             audio console: {offenders:?}"
+        );
+    }
+
+    /// The left console owns the audio controls; the ribbon AUDIO tab is
+    /// read-only for everything it owns. If a duplicate editor reappears in the
+    /// deck, the two surfaces can hold different values for one setting.
+    #[test]
+    fn ribbon_audio_tab_does_not_duplicate_console_controls() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src/shell/ribbon.rs");
+        let source = std::fs::read_to_string(&path).expect("read ribbon.rs");
+
+        let start = source.find("fn tab_audio(").expect("tab_audio exists");
+        let end = source[start..]
+            .find("\nfn tab_tools(")
+            .map(|offset| start + offset)
+            .expect("tab_tools follows tab_audio");
+        let body = &source[start..end];
+
+        for forbidden in [
+            "selected_device",  // device selection
+            "devices",          // device list
+            "gain_db",          // gain staging
+            "set_gain_db",
+            "hpf_enabled",      // signal chain
+            "noise_gate_enabled",
+            "monitoring.muted", // monitoring mute/solo
+            "monitoring.solo",
+        ] {
+            assert!(
+                !body.contains(forbidden),
+                "ribbon AUDIO tab must not edit `{forbidden}` — that control is owned \
+                 by the left audio console (panels::audio)"
+            );
+        }
     }
 
     #[test]

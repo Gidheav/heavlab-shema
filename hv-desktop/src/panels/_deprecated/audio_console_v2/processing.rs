@@ -6,39 +6,72 @@ use hv_pipeline::events::PipelineCommand;
 pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
     // Header hint
     ui.label(
-        egui::RichText::new("Toggle DSP processors in the chain. Active processors run top-to-bottom.")
-            .size(10.0)
-            .color(crate::theme::text_secondary()),
+        egui::RichText::new(
+            "Toggle DSP processors in the chain. Active processors run top-to-bottom.",
+        )
+        .size(10.0)
+        .color(crate::theme::text_secondary()),
     );
     ui.add_space(6.0);
 
     // High-Pass Filter
     let mut hpf_enabled = app.config.hpf_enabled;
-    if processor_row(ui, 0, &mut hpf_enabled, "High-Pass Filter", format!("Freq: {}Hz", app.config.hpf_frequency).as_str(), "Slope: 12dB/oct") {
+    if processor_row(
+        ui,
+        0,
+        &mut hpf_enabled,
+        "High-Pass Filter",
+        format!("Freq: {}Hz", app.config.hpf_frequency).as_str(),
+        "Slope: 12dB/oct",
+    ) {
         app.config.hpf_enabled = hpf_enabled;
-        app.pipeline.send_command(PipelineCommand::EnableHighPass(hpf_enabled));
+        app.pipeline
+            .send_command(PipelineCommand::EnableHighPass(hpf_enabled));
         let _ = app.config.save();
     }
 
     // Noise Gate
     let mut gate_enabled = app.config.noise_gate_enabled;
-    if processor_row(ui, 1, &mut gate_enabled, "Noise Gate", format!("Threshold: {:.3}", app.config.noise_gate_threshold).as_str(), "Attack: 10ms | Release: 100ms") {
+    if processor_row(
+        ui,
+        1,
+        &mut gate_enabled,
+        "Noise Gate",
+        format!("Threshold: {:.3}", app.config.noise_gate_threshold).as_str(),
+        "Attack: 10ms | Release: 100ms",
+    ) {
         app.config.noise_gate_enabled = gate_enabled;
-        app.pipeline.send_command(PipelineCommand::EnableNoiseGate(gate_enabled));
+        app.pipeline
+            .send_command(PipelineCommand::EnableNoiseGate(gate_enabled));
         let _ = app.config.save();
     }
 
     // Compressor
     let mut comp_enabled = app.config.compressor_enabled;
-    if processor_row(ui, 2, &mut comp_enabled, "Compressor", format!("Ratio: {}:1", app.config.compressor_ratio).as_str(), "Threshold: -20dBFS") {
+    if processor_row(
+        ui,
+        2,
+        &mut comp_enabled,
+        "Compressor",
+        format!("Ratio: {}:1", app.config.compressor_ratio).as_str(),
+        "Threshold: -20dBFS",
+    ) {
         app.config.compressor_enabled = comp_enabled;
-        app.pipeline.send_command(PipelineCommand::EnableCompressor(comp_enabled));
+        app.pipeline
+            .send_command(PipelineCommand::EnableCompressor(comp_enabled));
         let _ = app.config.save();
     }
 }
 
 // Returns true if the toggle was clicked
-fn processor_row(ui: &mut Ui, index: usize, enabled: &mut bool, name: &str, primary: &str, secondary: &str) -> bool {
+fn processor_row(
+    ui: &mut Ui,
+    index: usize,
+    enabled: &mut bool,
+    name: &str,
+    primary: &str,
+    secondary: &str,
+) -> bool {
     let mut changed = false;
     egui::Frame::none()
         .fill(if *enabled {

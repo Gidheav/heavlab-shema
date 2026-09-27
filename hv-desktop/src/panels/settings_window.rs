@@ -399,16 +399,26 @@ fn page_audio(ui: &mut Ui, app: &mut HvBibleApp) {
     section_header(ui, "LEVELS");
 
     setting_row(ui, "Input Gain", "Scale the amplitude of the captured audio signal", |ui| {
+        // Speak decibels, matching the audio console and the deck. Writing the
+        // raw linear multiplier here would let this dialog disagree with every
+        // other surface about what the gain actually is.
         ui.horizontal(|ui| {
-            ui.add(
-                egui::Slider::new(&mut app.gain, 0.1..=4.0)
-                    .step_by(0.05)
-                    .fixed_decimals(2)
-                    .text("×"),
+            let mut gain_db = app.gain_db();
+            let response = ui.add(
+                egui::Slider::new(&mut gain_db, -60.0..=24.0)
+                    .step_by(0.5)
+                    .fixed_decimals(1)
+                    .suffix(" dB"),
             );
-            if ui.small_button("↺").on_hover_text("Reset to 1.0×").clicked() {
-                app.gain = 1.0;
-                app.pipeline.send_command(hv_pipeline::PipelineCommand::SetGain(1.0));
+            if response.changed() {
+                app.set_gain_db(gain_db);
+            }
+            if ui
+                .small_button("↺")
+                .on_hover_text("Reset to 0.0 dB (unity)")
+                .clicked()
+            {
+                app.set_gain_db(0.0);
             }
         });
     });
@@ -463,8 +473,7 @@ fn page_recognition(ui: &mut Ui, app: &mut HvBibleApp) {
                     if ui.add_enabled(m.available, egui::SelectableLabel::new(is_sel, lbl)).clicked()
                         && !is_sel
                     {
-                        app.selected_model_id = m.id.clone();
-                        app.restart_required = true;
+                        app.change_model(m.id.clone());
                     }
                 }
             });

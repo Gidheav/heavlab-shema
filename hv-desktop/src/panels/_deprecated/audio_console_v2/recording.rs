@@ -77,7 +77,13 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
             .selected_text(rec.format.clone())
             .width(format_width)
             .show_ui(ui, |ui| {
-                for item in ["WAV 16-bit", "WAV 24-bit", "WAV 32-bit Float", "FLAC", "MP3 320k"] {
+                for item in [
+                    "WAV 16-bit",
+                    "WAV 24-bit",
+                    "WAV 32-bit Float",
+                    "FLAC",
+                    "MP3 320k",
+                ] {
                     ui.selectable_value(&mut rec.format, item.to_string(), item);
                 }
             });

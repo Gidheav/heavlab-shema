@@ -42,11 +42,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
     ui.horizontal(|ui| {
         let (dot, _) = ui.allocate_exact_size(egui::vec2(8.0, 8.0), egui::Sense::hover());
         ui.painter().circle_filled(dot.center(), 4.0, health_color);
-        ui.label(
-            egui::RichText::new(&d.health)
-                .small()
-                .color(health_color),
-        );
+        ui.label(egui::RichText::new(&d.health).small().color(health_color));
     });
 
     ui.add_space(6.0);
@@ -78,14 +74,7 @@ pub fn show(ui: &mut Ui, app: &mut HvBibleApp) {
     ui.add_space(6.0);
 
     // Input gain quick slider
-    labeled_slider(
-        ui,
-        "Input Gain",
-        &mut app.gain,
-        -20.0,
-        20.0,
-        "dB",
-    );
+    labeled_slider(ui, "Input Gain", &mut app.gain, -20.0, 20.0, "dB");
 
     ui.add_space(4.0);
 

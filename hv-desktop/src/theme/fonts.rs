@@ -116,7 +116,7 @@ pub struct FontConfig {
     pub family: FontFamily,
     pub size: FontSize,
     pub style: FontStyle,
-    pub ui_scale: f32, // 0.75 - 2.0
+    pub ui_scale: f32, // 0.5 - 2.0
 }
 
 impl Default for FontConfig {
@@ -147,7 +147,7 @@ impl FontConfig {
     }
 
     pub fn with_scale(mut self, scale: f32) -> Self {
-        self.ui_scale = scale.clamp(0.75, 2.0);
+        self.ui_scale = scale.clamp(0.5, 2.0);
         self
     }
 }
