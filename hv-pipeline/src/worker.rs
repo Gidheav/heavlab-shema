@@ -6,7 +6,9 @@ use std::thread;
 use bible_core::store::TranslationStore;
 use crossbeam_channel::{select, Receiver, Sender};
 use hv_asr::AsrEngine;
-use hv_audio::{AudioChunk, AudioMeter, MicrophoneCapture, NoiseGate, HighPassFilter, Compressor};
+use hv_audio::{
+    Aec, Agc, AudioChunk, AudioMeter, Compressor, HighPassFilter, MicrophoneCapture, NoiseGate,
+};
 use hv_vad::{Vad, VadState};
 
 use crate::detector::VerseDetector;
@@ -86,12 +88,75 @@ fn emit(tx: &Sender<PipelineEvent>, event: PipelineEvent) {
 }
 
 fn apply_gain(chunk: &mut AudioChunk, gain: f32) {
-    if (gain - 1.0).abs() < f32::EPSILON {
+    if gain <= 0.0 {
         return;
     }
     for sample in &mut chunk.samples {
         let scaled = f32::from(*sample) * gain;
         *sample = scaled.clamp(f32::from(i16::MIN), f32::from(i16::MAX)) as i16;
+    }
+}
+
+/// The capture-side DSP chain, owned by the worker loop.
+///
+/// Grouped into one struct so the chain order is stated once, in
+/// [`Chain::apply`], instead of being spread across a dozen call arguments.
+struct Chain {
+    gain: f32,
+    hpf_enabled: bool,
+    hpf: HighPassFilter,
+    aec_enabled: bool,
+    aec: Aec,
+    gate_enabled: bool,
+    gate: NoiseGate,
+    agc_enabled: bool,
+    agc: Agc,
+    compressor_enabled: bool,
+    compressor: Compressor,
+}
+
+impl Default for Chain {
+    /// Transparent by default: unity gain, every processor bypassed. The chain
+    /// only starts doing something when the operator asks for it, and a zero
+    /// gain would silence the service instead of passing it through.
+    fn default() -> Self {
+        Self {
+            gain: 1.0,
+            hpf_enabled: false,
+            hpf: HighPassFilter::default(),
+            aec_enabled: false,
+            aec: Aec::default(),
+            gate_enabled: false,
+            gate: NoiseGate::default(),
+            agc_enabled: false,
+            agc: Agc::default(),
+            compressor_enabled: false,
+            compressor: Compressor::default(),
+        }
+    }
+}
+
+impl Chain {
+    /// Runs the buffer through the chain in broadcast order: trim the rumble,
+    /// kill the feedback, close the gate on room tone, ride the level, then
+    /// control the dynamics. Reordering these changes what the ASR hears.
+    fn apply(&mut self, chunk: &mut AudioChunk) {
+        apply_gain(chunk, self.gain);
+        if self.hpf_enabled {
+            self.hpf.process(chunk);
+        }
+        if self.aec_enabled {
+            self.aec.process(chunk);
+        }
+        if self.gate_enabled {
+            self.gate.process(chunk);
+        }
+        if self.agc_enabled {
+            self.agc.process(chunk);
+        }
+        if self.compressor_enabled {
+            self.compressor.process(chunk);
+        }
     }
 }
 
@@ -106,13 +171,8 @@ fn worker_loop(
 ) {
     let mut meter = AudioMeter::new();
     let mut detector = VerseDetector::new(store, translation);
-    let mut gain = 1.0_f32;
-    let mut noise_gate_enabled = false;
-    let mut noise_gate = NoiseGate::default();
-    let mut hpf_enabled = false;
-    let mut hpf = HighPassFilter::default();
-    let mut compressor_enabled = false;
-    let mut compressor = Compressor::default();
+    let mut chain = Chain::default();
+    let mut paused = false;
     
     let mut audio_rx: Option<Receiver<AudioChunk>> = None;
     let mut last_state = PipelineState::Stopped;
@@ -133,13 +193,8 @@ fn worker_loop(
                             &mut engine,
                             &mut detector,
                             &mut meter,
-                            &mut gain,
-                            &mut noise_gate_enabled,
-                            &mut noise_gate,
-                            &mut hpf_enabled,
-                            &mut hpf,
-                            &mut compressor_enabled,
-                            &mut compressor,
+                            &mut paused,
+                            &mut chain,
                             &mut audio_rx,
                             &event_tx,
                             &mut last_state,
@@ -151,17 +206,12 @@ fn worker_loop(
                     match msg {
                         Ok(chunk) => process_chunk(
                             chunk,
-                            gain,
+                            paused,
+                            &mut chain,
                             &mut meter,
                             &mut vad,
                             &mut engine,
                             &mut detector,
-                            noise_gate_enabled,
-                            &mut noise_gate,
-                            hpf_enabled,
-                            &mut hpf,
-                            compressor_enabled,
-                            &mut compressor,
                             &event_tx,
                             &mut last_state,
                         ),
@@ -209,13 +259,8 @@ fn worker_loop(
                     &mut engine,
                     &mut detector,
                     &mut meter,
-                    &mut gain,
-                    &mut noise_gate_enabled,
-                    &mut noise_gate,
-                    &mut hpf_enabled,
-                    &mut hpf,
-                    &mut compressor_enabled,
-                    &mut compressor,
+                    &mut paused,
+                    &mut chain,
                     &mut audio_rx,
                     &event_tx,
                     &mut last_state,
@@ -236,13 +281,8 @@ fn handle_command(
     engine: &mut Box<dyn AsrEngine>,
     detector: &mut VerseDetector,
     meter: &mut AudioMeter,
-    gain: &mut f32,
-    noise_gate_enabled: &mut bool,
-    noise_gate: &mut NoiseGate,
-    hpf_enabled: &mut bool,
-    hpf: &mut HighPassFilter,
-    compressor_enabled: &mut bool,
-    compressor: &mut Compressor,
+    paused: &mut bool,
+    chain: &mut Chain,
     audio_rx: &mut Option<Receiver<AudioChunk>>,
     event_tx: &Sender<PipelineEvent>,
     last_state: &mut PipelineState,
@@ -252,6 +292,7 @@ fn handle_command(
             if audio_rx.is_some() {
                 return;
             }
+            *paused = false;
             match capture.start() {
                 Ok(rx) => {
                     vad.reset();
@@ -272,13 +313,32 @@ fn handle_command(
         PipelineCommand::Stop => {
             capture.stop();
             *audio_rx = None;
+            *paused = false;
             vad.reset();
             detector.reset();
             meter.reset();
             set_state(event_tx, last_state, PipelineState::Stopped);
         }
+        PipelineCommand::Pause => {
+            *paused = true;
+            vad.reset();
+            detector.reset();
+            meter.reset();
+        }
+        PipelineCommand::Resume => {
+            if !*paused {
+                return;
+            }
+            *paused = false;
+            // Reset the chain and detector so resuming does not open with a
+            // burst built from the paused-away audio.
+            vad.reset();
+            detector.reset();
+            meter.reset();
+            let _ = engine.reset();
+        }
         PipelineCommand::SetGain(value) => {
-            *gain = value.clamp(0.0, 4.0);
+            chain.gain = value.clamp(0.0, 4.0);
         }
         PipelineCommand::SetTranslation(translation) => {
             detector.set_translation(translation);
@@ -290,9 +350,9 @@ fn handle_command(
             meter.reset();
             detector.reset();
             set_state(event_tx, last_state, PipelineState::Stopped);
-            
+
             *capture = Box::new(hv_audio::CpalCapture::with_device(device_name));
-            
+
             match capture.start() {
                 Ok(rx) => {
                     if let Err(error) = engine.reset() {
@@ -307,22 +367,31 @@ fn handle_command(
             }
         }
         PipelineCommand::SetNoiseGateThreshold(t) => {
-            noise_gate.threshold = t;
+            chain.gate.threshold = t;
         }
         PipelineCommand::EnableNoiseGate(enable) => {
-            *noise_gate_enabled = enable;
+            chain.gate_enabled = enable;
         }
         PipelineCommand::SetHighPassFreq(freq) => {
-            hpf.frequency = freq;
+            chain.hpf.frequency = freq;
         }
         PipelineCommand::EnableHighPass(enable) => {
-            *hpf_enabled = enable;
+            chain.hpf_enabled = enable;
         }
         PipelineCommand::SetCompressorRatio(r) => {
-            compressor.ratio = r;
+            chain.compressor.ratio = r;
         }
         PipelineCommand::EnableCompressor(enable) => {
-            *compressor_enabled = enable;
+            chain.compressor_enabled = enable;
+        }
+        PipelineCommand::EnableAgc(enable) => {
+            chain.agc_enabled = enable;
+        }
+        PipelineCommand::EnableAec(enable) => {
+            chain.aec_enabled = enable;
+        }
+        PipelineCommand::SetVadSensitivity(sensitivity) => {
+            vad.set_sensitivity(sensitivity);
         }
     }
 }
@@ -330,31 +399,20 @@ fn handle_command(
 #[allow(clippy::too_many_arguments)]
 fn process_chunk(
     mut chunk: AudioChunk,
-    gain: f32,
+    paused: bool,
+    chain: &mut Chain,
     meter: &mut AudioMeter,
     vad: &mut Box<dyn Vad>,
     engine: &mut Box<dyn AsrEngine>,
     detector: &mut VerseDetector,
-    noise_gate_enabled: bool,
-    noise_gate: &mut NoiseGate,
-    hpf_enabled: bool,
-    hpf: &mut HighPassFilter,
-    compressor_enabled: bool,
-    compressor: &mut Compressor,
     event_tx: &Sender<PipelineEvent>,
     last_state: &mut PipelineState,
 ) {
-    apply_gain(&mut chunk, gain);
-    
-    if hpf_enabled {
-        hpf.process(&mut chunk);
+    if paused {
+        return;
     }
-    if noise_gate_enabled {
-        noise_gate.process(&mut chunk);
-    }
-    if compressor_enabled {
-        compressor.process(&mut chunk);
-    }
+
+    chain.apply(&mut chunk);
 
     let reading = meter.process(&chunk);
     emit(

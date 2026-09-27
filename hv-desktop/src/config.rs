@@ -7,6 +7,76 @@ use std::io;
 use crate::layout::layout_state::LayoutState;
 use crate::paths;
 
+/// Defaults for the fields added when the left column was rebuilt. Named
+/// functions rather than literals so `#[serde(default = "...")]` and
+/// [`AppConfig::default`] can never disagree about a starting value.
+fn default_lpf_frequency() -> f32 {
+    8_000.0
+}
+fn default_deesser_frequency() -> f32 {
+    6_000.0
+}
+fn default_monitor_device() -> String {
+    "System Default".to_string()
+}
+fn default_headphone_device() -> String {
+    "System Default".to_string()
+}
+fn default_recording_format() -> String {
+    "WAV 24-bit".to_string()
+}
+fn default_preset_name() -> String {
+    "Church Service".to_string()
+}
+fn default_diagnostics_interval() -> u32 {
+    1_000
+}
+fn default_sample_rate() -> String {
+    "48 kHz".to_string()
+}
+fn default_bit_depth() -> String {
+    "24-bit".to_string()
+}
+fn default_buffer_size() -> String {
+    "256".to_string()
+}
+fn default_agc_target_db() -> f32 {
+    -18.0
+}
+fn default_agc_max_gain_db() -> f32 {
+    20.0
+}
+
+/// One stored console setup. Only the parameters an operator actually dials in
+/// during setup — not the whole config, so a preset stays readable in the TOML.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SavedPreset {
+    pub name: String,
+    pub gain_db: f32,
+    pub agc_enabled: bool,
+    pub aec_enabled: bool,
+    pub noise_gate_enabled: bool,
+    pub vad_sensitivity: f32,
+    pub led_hardware: bool,
+    pub led_screen: bool,
+}
+
+impl Default for SavedPreset {
+    fn default() -> Self {
+        Self {
+            name: "Custom".to_string(),
+            gain_db: 0.0,
+            agc_enabled: false,
+            aec_enabled: false,
+            noise_gate_enabled: false,
+            vad_sensitivity: 0.5,
+            led_hardware: true,
+            led_screen: true,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
     pub audio_device: Option<String>,
@@ -26,6 +96,66 @@ pub struct AppConfig {
     pub hpf_frequency: f32,
     pub compressor_enabled: bool,
     pub compressor_ratio: f32,
+    // ── Left-column processors, owned by panels::audio::gain ──────────────────
+    #[serde(default)]
+    pub agc_enabled: bool,
+    #[serde(default)]
+    pub aec_enabled: bool,
+    /// Where the AGC rides. A per-venue setting, so it lives on the config
+    /// rather than on each saved preset.
+    #[serde(default = "default_agc_target_db")]
+    pub agc_target_db: f32,
+    #[serde(default = "default_agc_max_gain_db")]
+    pub agc_max_gain_db: f32,
+
+    // ── Relocated out of the left column into Settings → Audio ───────────────
+    #[serde(default)]
+    pub lpf_enabled: bool,
+    #[serde(default = "default_lpf_frequency")]
+    pub lpf_frequency: f32,
+    #[serde(default)]
+    pub deesser_enabled: bool,
+    #[serde(default = "default_deesser_frequency")]
+    pub deesser_frequency: f32,
+    #[serde(default = "default_monitor_device")]
+    pub monitor_output_device: String,
+    #[serde(default)]
+    pub monitor_volume_db: f32,
+    #[serde(default = "default_headphone_device")]
+    pub headphone_output_device: String,
+    #[serde(default)]
+    pub headphone_volume_db: f32,
+    #[serde(default = "default_recording_format")]
+    pub recording_format: String,
+    #[serde(default)]
+    pub recording_auto: bool,
+    /// Divider the operator's saved presets are stored under. See
+    /// `panels::audio::preset`.
+    #[serde(default = "default_preset_name")]
+    pub preset_name: String,
+    #[serde(default = "default_preset_name")]
+    pub default_preset_name: String,
+    #[serde(default)]
+    pub saved_presets: Vec<SavedPreset>,
+    #[serde(default = "default_sample_rate")]
+    pub capture_sample_rate: String,
+    #[serde(default = "default_bit_depth")]
+    pub capture_bit_depth: String,
+    #[serde(default = "default_buffer_size")]
+    pub capture_buffer_size: String,
+
+    // ── Relocated to Settings → Advanced ─────────────────────────────────────
+    #[serde(default = "default_diagnostics_interval")]
+    pub diagnostics_interval_ms: u32,
+    #[serde(default)]
+    pub experimental_features: bool,
+
+    // ── Relocated to Settings → Developer ────────────────────────────────────
+    #[serde(default)]
+    pub debug_overlay: bool,
+    #[serde(default)]
+    pub verbose_logging: bool,
+
     pub use_gpu: bool,
     pub num_threads: usize,
     pub hotwords_enabled: bool,
@@ -61,6 +191,30 @@ impl Default for AppConfig {
             hpf_frequency: 80.0,
             compressor_enabled: false,
             compressor_ratio: 4.0,
+            agc_enabled: false,
+            aec_enabled: false,
+            agc_target_db: default_agc_target_db(),
+            agc_max_gain_db: default_agc_max_gain_db(),
+            lpf_enabled: false,
+            lpf_frequency: default_lpf_frequency(),
+            deesser_enabled: false,
+            deesser_frequency: default_deesser_frequency(),
+            monitor_output_device: default_monitor_device(),
+            monitor_volume_db: 0.0,
+            headphone_output_device: default_headphone_device(),
+            headphone_volume_db: 0.0,
+            recording_format: default_recording_format(),
+            recording_auto: false,
+            preset_name: default_preset_name(),
+            default_preset_name: default_preset_name(),
+            saved_presets: Vec::new(),
+            capture_sample_rate: default_sample_rate(),
+            capture_bit_depth: default_bit_depth(),
+            capture_buffer_size: default_buffer_size(),
+            diagnostics_interval_ms: default_diagnostics_interval(),
+            experimental_features: false,
+            debug_overlay: false,
+            verbose_logging: false,
             use_gpu: false,
             num_threads: 4,
             hotwords_enabled: false,

@@ -3,20 +3,36 @@
 
 use eframe::egui::{self, Context, Frame, Margin, RichText, Sense, Stroke, Ui, Vec2};
 use crate::app::HvBibleApp;
-use crate::theme::{self, STATUS_SUCCESS, STATUS_WARNING};
+use crate::theme::{self, STATUS_ERROR, STATUS_SUCCESS, STATUS_WARNING};
 
 struct NavEntry {
     icon:  &'static str,
     label: &'static str,
 }
 
+/// Tab indices. Named so the left column's gear can open Settings straight on
+/// Audio without anyone counting array positions.
+pub const TAB_GENERAL: usize = 0;
+pub const TAB_AUDIO: usize = 1;
+pub const TAB_RECOGNITION: usize = 2;
+pub const TAB_PROCESSING: usize = 3;
+pub const TAB_RECORDING: usize = 4;
+pub const TAB_ADVANCED: usize = 5;
+pub const TAB_DEVELOPER: usize = 6;
+pub const TAB_BIBLE: usize = 7;
+pub const TAB_SHORTCUTS: usize = 8;
+pub const TAB_ABOUT: usize = 9;
+
 const NAV: &[NavEntry] = &[
     NavEntry { icon: "🖥",  label: "General"     },
     NavEntry { icon: "🎙",  label: "Audio"       },
     NavEntry { icon: "🤖",  label: "Recognition" },
     NavEntry { icon: "🎛",  label: "Processing"  },
-    NavEntry { icon: "📖",  label: "Bible"       },
+    NavEntry { icon: "⏺",  label: "Recording"   },
+    NavEntry { icon: "⚙",  label: "Advanced"    },
     NavEntry { icon: "⌨",  label: "Shortcuts"   },
+    NavEntry { icon: "📖",  label: "Bible"       },
+    NavEntry { icon: "🛠",  label: "Developer"   },
     NavEntry { icon: "ℹ",  label: "About"       },
 ];
 
@@ -94,13 +110,16 @@ pub fn show(ctx: &Context, app: &mut HvBibleApp) {
                         Frame::none().inner_margin(margin).show(ui, |ui| {
                             ui.set_min_width(ui.available_width());
                             match app.config.layout_state.settings_tab {
-                                0 => page_general(ui, app),
-                                1 => page_audio(ui, app),
-                                2 => page_recognition(ui, app),
-                                3 => page_processing(ui, app),
-                                4 => page_bible(ui, app),
-                                5 => page_shortcuts(ui),
-                                6 => page_about(ui),
+                                TAB_GENERAL => page_general(ui, app),
+                                TAB_AUDIO => page_audio(ui, app),
+                                TAB_RECOGNITION => page_recognition(ui, app),
+                                TAB_PROCESSING => page_processing(ui, app),
+                                TAB_RECORDING => page_recording(ui, app),
+                                TAB_ADVANCED => page_advanced(ui, app),
+                                TAB_DEVELOPER => page_developer(ui, app),
+                                TAB_BIBLE => page_bible(ui, app),
+                                TAB_SHORTCUTS => page_shortcuts(ui),
+                                TAB_ABOUT => page_about(ui),
                                 _ => {}
                             }
                         });
@@ -368,9 +387,82 @@ fn page_general(ui: &mut Ui, app: &mut HvBibleApp) {
     });
 }
 
-fn page_audio(ui: &mut Ui, app: &mut HvBibleApp) {
-    page_title(ui, "🎙", "Audio", "Capture device, levels, and live monitoring");
+const ROUTING_INPUTS: &[&str] = &["Mono", "Stereo", "Channel 1", "Channel 2", "Channel 1+2"];
+const ROUTING_BUSSES: &[&str] = &["Mono (L+R)", "Mono (L)", "Mono (R)", "Stereo"];
+const ROUTING_PHASES: &[&str] = &["Normal", "Inverted"];
+const MONITOR_DEVICES: &[&str] = &["System Default", "Headphones", "Line Out", "Program Bus"];
+const CUE_BUSES: &[&str] = &["Operator", "Program", "Cue Only"];
+const SAMPLE_RATES: &[&str] = &["16 kHz", "44.1 kHz", "48 kHz", "96 kHz"];
+const BIT_DEPTHS: &[&str] = &["16-bit", "24-bit", "32-bit Float"];
+const BUFFER_SIZES: &[&str] = &["64", "128", "256", "512", "1024", "2048"];
+const AGC_TARGETS_DB: [f32; 4] = [-24.0, -18.0, -12.0, -6.0];
+pub const PRESET_NAMES: &[&str] = &[
+    "Church Service",
+    "Podcast Studio",
+    "Conference Hall",
+    "Quiet Room",
+    "Outdoor Event",
+    "Custom",
+];
+const RECORDING_FORMATS: &[&str] = &[
+    "WAV 16-bit",
+    "WAV 24-bit",
+    "WAV 32-bit Float",
+    "FLAC",
+    "MP3 320k",
+];
 
+/// A labelled combo box over a fixed list of options.
+fn choice(ui: &mut Ui, id: &str, selected: &mut String, options: &[&str]) {
+    egui::ComboBox::from_id_salt(id)
+        .selected_text(selected.clone())
+        .width(300.0)
+        .show_ui(ui, |ui| {
+            for option in options {
+                ui.selectable_value(selected, (*option).to_string(), *option);
+            }
+        });
+}
+
+/// Bypass switch plus tuning summary for one signal-chain processor.
+///
+/// Returns whether the operator flipped it. The caller forwards the change to
+/// the pipeline and persists it, because the closure here already holds the
+/// mutable borrow of the flag itself.
+fn processor_switch(ui: &mut Ui, enabled: &mut bool, detail: &str) -> bool {
+    let mut changed = false;
+    ui.horizontal(|ui| {
+        changed = ui.checkbox(enabled, "").changed();
+        ui.label(
+            RichText::new(detail)
+                .size(11.5)
+                .color(theme::text_secondary())
+                .monospace(),
+        );
+        ui.add_space(12.0);
+        ui.label(
+            RichText::new(if *enabled { "ON" } else { "OFF" })
+                .size(10.5)
+                .strong()
+                .color(if *enabled {
+                    STATUS_SUCCESS
+                } else {
+                    theme::text_tertiary()
+                }),
+        );
+    });
+    changed
+}
+
+fn page_audio(ui: &mut Ui, app: &mut HvBibleApp) {
+    page_title(
+        ui,
+        "🎙",
+        "Audio",
+        "Capture device, signal chain, monitoring, and audio format",
+    );
+
+    // ── INPUT DEVICE ───────────────────────────────────────────────────────
     section_header(ui, "INPUT DEVICE");
 
     setting_row(ui, "Microphone / Input", "System audio input source for capture", |ui| {
@@ -378,13 +470,20 @@ fn page_audio(ui: &mut Ui, app: &mut HvBibleApp) {
             .selected_text(&app.selected_device)
             .width(300.0)
             .show_ui(ui, |ui| {
-                for dev in app.devices.clone() {
-                    if ui.selectable_value(&mut app.selected_device, dev.clone(), &dev).clicked() {
+                for device in &app.devices {
+                    if ui
+                        .selectable_value(&mut app.selected_device, device.clone(), device)
+                        .clicked()
+                    {
                         app.restart_required = true;
-                        app.pipeline.send_command(hv_pipeline::PipelineCommand::SetDevice(dev));
+                        app.pipeline
+                            .send_command(hv_pipeline::PipelineCommand::SetDevice(device.clone()));
                     }
                 }
             });
+        if ui.link("  Rescan").clicked() {
+            app.refresh_devices();
+        }
     });
 
     if app.restart_required {
@@ -396,10 +495,8 @@ fn page_audio(ui: &mut Ui, app: &mut HvBibleApp) {
         ui.add_space(6.0);
     }
 
-    section_header(ui, "LEVELS");
-
     setting_row(ui, "Input Gain", "Scale the amplitude of the captured audio signal", |ui| {
-        // Speak decibels, matching the audio console and the deck. Writing the
+        // Speak decibels, matching the left column and the deck. Writing the
         // raw linear multiplier here would let this dialog disagree with every
         // other surface about what the gain actually is.
         ui.horizontal(|ui| {
@@ -423,11 +520,258 @@ fn page_audio(ui: &mut Ui, app: &mut HvBibleApp) {
         });
     });
 
+    // ── CHANNEL ROUTING (relocated out of the left column) ──────────────────
+    section_header(ui, "CHANNEL ROUTING");
+
+    setting_row(ui, "Capture Layout", "Which channels of the device feed the chain", |ui| {
+        choice(ui, "s_route_input", &mut app.audio_mock.routing.input, ROUTING_INPUTS);
+    });
+
+    setting_row(ui, "Processing Bus", "How channels are summed before recognition", |ui| {
+        choice(ui, "s_route_proc", &mut app.audio_mock.routing.processing, ROUTING_BUSSES);
+    });
+
+    setting_row(ui, "Phase", "Invert a channel to cancel a polarity mismatch", |ui| {
+        choice(ui, "s_route_phase", &mut app.audio_mock.routing.phase, ROUTING_PHASES);
+    });
+
+    for (index, label) in ["Left", "Right"].iter().enumerate() {
+        let mut active = app.audio_mock.routing.channels[index].active;
+        setting_row(
+            ui,
+            &format!("{label} Channel"),
+            "Contribute to the processing bus",
+            |ui| {
+                ui.checkbox(&mut active, "Enabled");
+            },
+        );
+        app.audio_mock.routing.channels[index].active = active;
+    }
+
+    // ── SIGNAL CHAIN (relocated out of the left column) ─────────────────────
+    section_header(ui, "SIGNAL CHAIN");
+
+    let hpf_detail = format!("{:.0} Hz · 12 dB/oct", app.config.hpf_frequency);
+    let mut hpf = app.config.hpf_enabled;
+    setting_row(ui, "High-Pass Filter", "Removes rumble and handling noise", |ui| {
+        processor_switch(ui, &mut hpf, &hpf_detail);
+    });
+    if processor_switch_changed(&hpf, &app.config.hpf_enabled) {
+        app.set_hpf_enabled(hpf);
+    }
+    if app.config.hpf_enabled {
+        let mut freq = app.config.hpf_frequency;
+        setting_row(ui, "HPF Cutoff", "Where the filter starts rolling off", |ui| {
+            ui.add(egui::Slider::new(&mut freq, 20.0..=400.0).step_by(1.0).suffix(" Hz"));
+        });
+        if freq != app.config.hpf_frequency {
+            app.config.hpf_frequency = freq;
+            app.pipeline
+                .send_command(hv_pipeline::PipelineCommand::SetHighPassFreq(freq));
+            app.save_config();
+        }
+    }
+
+    let lpf_detail = format!("{:.0} Hz · 12 dB/oct", app.config.lpf_frequency);
+    let mut lpf = app.config.lpf_enabled;
+    setting_row(ui, "Low-Pass Filter", "Trims hiss and open-air top end", |ui| {
+        processor_switch(ui, &mut lpf, &lpf_detail);
+    });
+    if processor_switch_changed(&lpf, &app.config.lpf_enabled) {
+        app.set_lpf_enabled(lpf);
+    }
+    if app.config.lpf_enabled {
+        let mut freq = app.config.lpf_frequency;
+        setting_row(ui, "LPF Cutoff", "Where the filter starts rolling off", |ui| {
+            ui.add(egui::Slider::new(&mut freq, 2_000.0..=16_000.0).step_by(100.0).suffix(" Hz"));
+        });
+        if freq != app.config.lpf_frequency {
+            app.config.lpf_frequency = freq;
+            app.save_config();
+        }
+    }
+
+    let comp_detail = format!("{:.1}:1 · threshold −20 dBFS", app.config.compressor_ratio);
+    let mut comp = app.config.compressor_enabled;
+    setting_row(ui, "Compressor", "Evens out a soft take against a loud one", |ui| {
+        processor_switch(ui, &mut comp, &comp_detail);
+    });
+    if processor_switch_changed(&comp, &app.config.compressor_enabled) {
+        app.set_compressor_enabled(comp);
+    }
+    if app.config.compressor_enabled {
+        let mut ratio = app.config.compressor_ratio;
+        setting_row(ui, "Ratio", "How hard the compressor pulls down", |ui| {
+            ui.add(egui::Slider::new(&mut ratio, 1.0..=12.0).step_by(0.5).suffix(":1"));
+        });
+        if ratio != app.config.compressor_ratio {
+            app.config.compressor_ratio = ratio;
+            app.pipeline
+                .send_command(hv_pipeline::PipelineCommand::SetCompressorRatio(ratio));
+            app.save_config();
+        }
+    }
+
+    let deess_detail = format!("{:.0} Hz shelf", app.config.deesser_frequency);
+    let mut deess = app.config.deesser_enabled;
+    setting_row(ui, "De-esser", "Tames sibilance on S and T", |ui| {
+        processor_switch(ui, &mut deess, &deess_detail);
+    });
+    if processor_switch_changed(&deess, &app.config.deesser_enabled) {
+        app.set_deesser_enabled(deess);
+    }
+    if app.config.deesser_enabled {
+        let mut freq = app.config.deesser_frequency;
+        setting_row(ui, "De-esser Freq", "Centre of the sibilance band", |ui| {
+            ui.add(egui::Slider::new(&mut freq, 2_000.0..=12_000.0).step_by(100.0).suffix(" Hz"));
+        });
+        if freq != app.config.deesser_frequency {
+            app.config.deesser_frequency = freq;
+            app.save_config();
+        }
+    }
+
+    // AGC, the gate, and AEC are bypassed from the left column's Gain strip
+    // during a service; how hard they work is set here, once per venue.
+    section_header(ui, "AUTOMATIC GAIN");
+
+    setting_row(ui, "AGC Target", "Level the AGC rides to, when AGC is on", |ui| {
+        ui.horizontal(|ui| {
+            for target in AGC_TARGETS_DB {
+                let selected = app.config.agc_target_db == target;
+                if ui
+                    .selectable_label(selected, format!("{:.0} dB", target))
+                    .clicked()
+                {
+                    app.config.agc_target_db = target;
+                    app.save_config();
+                }
+            }
+        });
+    });
+
+    setting_row(ui, "AGC Max Lift", "Ceiling on how far AGC may pull a quiet take up", |ui| {
+        let mut max = app.config.agc_max_gain_db;
+        ui.add(egui::Slider::new(&mut max, 0.0..=30.0).step_by(1.0).suffix(" dB"));
+        if max != app.config.agc_max_gain_db {
+            app.config.agc_max_gain_db = max;
+            app.save_config();
+        }
+    });
+
+    setting_row(ui, "Noise Gate Threshold", "Level below which the gate closes", |ui| {
+        let mut threshold = app.config.noise_gate_threshold;
+        ui.add(
+            egui::Slider::new(&mut threshold, 0.0005..=0.05)
+                .logarithmic(true)
+                .suffix(" (−46 dBFS ≈ 0.005)"),
+        );
+        if threshold != app.config.noise_gate_threshold {
+            app.config.noise_gate_threshold = threshold;
+            app.pipeline
+                .send_command(hv_pipeline::PipelineCommand::SetNoiseGateThreshold(threshold));
+            app.save_config();
+        }
+    });
+
+    // ── MONITORING (relocated out of the left column) ───────────────────────
+    section_header(ui, "MONITORING");
+
+    setting_row(ui, "Monitor Output", "Device the operator hears in the room", |ui| {
+        choice(
+            ui,
+            "s_monitor_out",
+            &mut app.config.monitor_output_device,
+            MONITOR_DEVICES,
+        );
+    });
+
+    setting_row(ui, "Monitor Level", "Headroom in the control-room feed", |ui| {
+        let mut level = app.config.monitor_volume_db;
+        ui.add(egui::Slider::new(&mut level, -60.0..=12.0).step_by(0.5).suffix(" dB"));
+        if level != app.config.monitor_volume_db {
+            app.config.monitor_volume_db = level;
+            app.save_config();
+        }
+    });
+
+    setting_row(ui, "Cue Bus", "Mix the operator is sent for confidence monitoring", |ui| {
+        choice(ui, "s_cue_bus", &mut app.audio_mock.monitoring.cue_bus, CUE_BUSES);
+    });
+
+    // ── HEADPHONES (relocated out of the left column) ───────────────────────
+    section_header(ui, "HEADPHONES");
+
+    setting_row(ui, "Headphone Output", "Private feed for the operator, off-air", |ui| {
+        choice(
+            ui,
+            "s_headphone_dev",
+            &mut app.config.headphone_output_device,
+            MONITOR_DEVICES,
+        );
+    });
+
+    setting_row(ui, "Headphone Level", "Independent of the monitor level above", |ui| {
+        let mut level = app.config.headphone_volume_db;
+        ui.add(egui::Slider::new(&mut level, -60.0..=12.0).step_by(0.5).suffix(" dB"));
+        if level != app.config.headphone_volume_db {
+            app.config.headphone_volume_db = level;
+            app.save_config();
+        }
+    });
+
+    // ── AUDIO FORMAT (relocated out of the left column) ─────────────────────
+    section_header(ui, "AUDIO FORMAT");
+
+    setting_row(ui, "Capture Sample Rate", "Rate the device hands audio to the pipeline", |ui| {
+        choice(ui, "s_format_rate", &mut app.config.capture_sample_rate, SAMPLE_RATES);
+        app.save_config();
+    });
+
+    setting_row(ui, "Capture Bit Depth", "Quantisation of the capture stream", |ui| {
+        choice(ui, "s_format_depth", &mut app.config.capture_bit_depth, BIT_DEPTHS);
+        app.save_config();
+    });
+
+    setting_row(ui, "Buffer Size", "Frames per callback — lower is tighter, harder on the CPU", |ui| {
+        choice(ui, "s_format_buffer", &mut app.config.capture_buffer_size, BUFFER_SIZES);
+        app.save_config();
+    });
+
+    // ── PRESETS (relocated out of the left column) ──────────────────────────
+    section_header(ui, "PRESETS");
+
+    setting_row(ui, "Default Preset", "Preset a new session starts on", |ui| {
+        choice(ui, "s_default_preset", &mut app.config.default_preset_name, PRESET_NAMES);
+        app.save_config();
+    });
+
+    let stored = app.stored_preset_names();
+    if !stored.is_empty() {
+        setting_row(ui, "Stored Presets", "Saved console setups, recalled by name", |ui| {
+            ui.horizontal_wrapped(|ui| {
+                for name in &stored {
+                    let selected = app.config.preset_name == *name;
+                    if ui.selectable_label(selected, name.clone()).clicked() {
+                        app.apply_preset(name);
+                    }
+                }
+            });
+        });
+    }
+
     section_header(ui, "LIVE LEVELS");
     ui.add_space(4.0);
     meter_bar(ui, "RMS ", app.meter_rms);
     ui.add_space(6.0);
     meter_bar(ui, "Peak", app.meter_peak);
+}
+
+/// True when a bypass switch was flipped. The widget writes into a local and the
+/// caller compares — that keeps the mutable borrow of the config field out of
+/// the closure that is already holding it.
+fn processor_switch_changed(local: &bool, config: &bool) -> bool {
+    local != config
 }
 
 fn meter_bar(ui: &mut Ui, label: &str, db: f32) {
@@ -451,6 +795,7 @@ fn meter_bar(ui: &mut Ui, label: &str, db: f32) {
         );
     });
 }
+
 
 fn page_recognition(ui: &mut Ui, app: &mut HvBibleApp) {
     page_title(ui, "🤖", "Recognition", "ASR engine, model selection, and inference tuning");
@@ -600,6 +945,278 @@ fn page_processing(ui: &mut Ui, app: &mut HvBibleApp) {
             }
         });
     }
+}
+
+/// Recording controls. These left the main screen with the left-column rebuild:
+/// starting and stopping a capture is a decision made in setup, not while the
+/// pastor is preaching. The operator always sees the elapsed time in the
+/// status bar regardless of what this page says.
+fn page_recording(ui: &mut Ui, app: &mut HvBibleApp) {
+    page_title(
+        ui,
+        "⏺",
+        "Recording",
+        "Capture format, destination, and session housekeeping",
+    );
+
+    section_header(ui, "TRANSPORT");
+
+    let active = app.audio_mock.recording.active;
+    setting_row(
+        ui,
+        "Recording State",
+        "Whether audio is currently being written to disk",
+        |ui| {
+            ui.horizontal(|ui| {
+                if active {
+                    ui.colored_label(STATUS_ERROR, "⏺  RECORDING");
+                    ui.add_space(12.0);
+                    ui.label(
+                        RichText::new(&app.audio_mock.recording.elapsed)
+                            .size(15.0)
+                            .strong()
+                            .monospace()
+                            .color(STATUS_ERROR),
+                    );
+                } else {
+                    ui.label(
+                        RichText::new("⏹  STOPPED")
+                            .size(12.0)
+                            .color(theme::text_secondary()),
+                    );
+                }
+            });
+        },
+    );
+
+    let mut recording = active;
+    setting_row(
+        ui,
+        "Record",
+        "Write the capture stream to disk as it is recognised",
+        |ui| {
+            ui.horizontal(|ui| {
+                if ui.button("⏺  Start Recording").clicked() {
+                    recording = true;
+                }
+                if ui.button("⏹  Stop Recording").clicked() {
+                    recording = false;
+                }
+            });
+        },
+    );
+    app.audio_mock.recording.active = recording;
+
+    let mut auto = app.audio_mock.recording.auto_record;
+    setting_row(
+        ui,
+        "Auto-record",
+        "Begin a recording automatically when a session starts",
+        |ui| {
+            ui.checkbox(&mut auto, "Record on session start");
+        },
+    );
+    app.audio_mock.recording.auto_record = auto;
+
+    section_header(ui, "FORMAT & DESTINATION");
+
+    setting_row(ui, "File Format", "Container and encoding written to disk", |ui| {
+        choice(
+            ui,
+            "s_rec_format",
+            &mut app.config.recording_format,
+            RECORDING_FORMATS,
+        );
+        app.save_config();
+    });
+    app.audio_mock.recording.format = app.config.recording_format.clone();
+
+    setting_row(ui, "Destination", "Folder each session is written to", |ui| {
+        ui.label(
+            RichText::new(&app.audio_mock.recording.path)
+                .size(12.0)
+                .monospace()
+                .color(theme::text_primary()),
+        );
+    });
+
+    setting_row(ui, "Free Space", "Disk headroom on the session volume", |ui| {
+        ui.label(
+            RichText::new(format!("{} GB free", app.audio_mock.recording.disk_free_gb))
+                .size(12.5)
+                .monospace()
+                .color(theme::text_secondary()),
+        );
+    });
+
+    section_header(ui, "SESSIONS");
+
+    setting_row(ui, "Session Naming", "Pattern used for new recordings", |ui| {
+        ui.label(
+            RichText::new("sermon-YYYYMMDD-HHMM.wav")
+                .size(12.0)
+                .monospace()
+                .color(theme::text_secondary()),
+        );
+    });
+}
+
+/// Diagnostics and experimental switches. Off the main screen by design: an
+/// operator mid-service should never be looking at CPU or jitter.
+fn page_advanced(ui: &mut Ui, app: &mut HvBibleApp) {
+    page_title(
+        ui,
+        "⚙",
+        "Advanced",
+        "Runtime diagnostics and experimental behaviour",
+    );
+
+    section_header(ui, "DIAGNOSTICS");
+
+    let diagnostics = &app.audio_mock.diagnostics;
+    setting_row(ui, "Metrics", "Live CPU, jitter, and queue depth", |ui| {
+        egui::Grid::new("adv_metrics")
+            .num_columns(2)
+            .spacing([28.0, 6.0])
+            .show(ui, |ui| {
+                metric(ui, "CPU Usage", &format!("{}%", diagnostics.cpu_percent));
+                metric(
+                    ui,
+                    "Thread Jitter",
+                    &format!("{:.1} ms", diagnostics.jitter_ms),
+                );
+                metric(
+                    ui,
+                    "Dropped Frames",
+                    &diagnostics.dropped_frames.to_string(),
+                );
+                metric(
+                    ui,
+                    "Last Buffer",
+                    &format!("{:.1} ms", diagnostics.last_buffer_ms),
+                );
+                metric(ui, "ASR Queue", &diagnostics.asr_queue.to_string());
+                metric(ui, "Uptime", &diagnostics.uptime);
+            });
+    });
+
+    let mut interval = app.config.diagnostics_interval_ms as f32;
+    setting_row(
+        ui,
+        "Sample Interval",
+        "How often the metrics above are refreshed",
+        |ui| {
+            ui.add(egui::Slider::new(&mut interval, 100.0..=5_000.0).step_by(100.0).suffix(" ms"));
+        },
+    );
+    if interval as u32 != app.config.diagnostics_interval_ms {
+        app.config.diagnostics_interval_ms = interval as u32;
+        app.save_config();
+    }
+
+    section_header(ui, "EXPERIMENTAL");
+
+    let mut experimental = app.config.experimental_features;
+    setting_row(
+        ui,
+        "Experimental Features",
+        "Opt in to in-progress behaviour that may change without notice",
+        |ui| {
+            ui.checkbox(&mut experimental, "Enable experimental features");
+        },
+    );
+    if experimental != app.config.experimental_features {
+        app.config.experimental_features = experimental;
+        app.save_config();
+    }
+    if app.config.experimental_features {
+        ui.add_space(2.0);
+        ui.horizontal(|ui| {
+            ui.add_space(244.0);
+            ui.colored_label(
+                STATUS_WARNING,
+                "⚠ Experimental behaviour is on — not for a live service",
+            );
+        });
+    }
+}
+
+/// A key/value row inside a metrics grid.
+fn metric(ui: &mut Ui, key: &str, value: &str) {
+    ui.label(RichText::new(key).size(12.0).color(theme::text_tertiary()));
+    ui.label(
+        RichText::new(value)
+            .size(12.0)
+            .monospace()
+            .color(theme::text_primary()),
+    );
+    ui.end_row();
+}
+
+/// Development and debugging. Kept one tab away from everything an operator
+/// might open in a hurry.
+fn page_developer(ui: &mut Ui, app: &mut HvBibleApp) {
+    page_title(
+        ui,
+        "🛠",
+        "Developer",
+        "Diagnostics overlays and logging for troubleshooting",
+    );
+
+    section_header(ui, "OVERLAYS");
+
+    let mut debug = app.config.debug_overlay;
+    setting_row(
+        ui,
+        "Debug Overlay",
+        "Draw frame timings, layout rects, and widget ids over the UI",
+        |ui| {
+            ui.checkbox(&mut debug, "Show debug overlay");
+        },
+    );
+    if debug != app.config.debug_overlay {
+        app.config.debug_overlay = debug;
+        app.save_config();
+    }
+
+    section_header(ui, "LOGGING");
+
+    let mut verbose = app.config.verbose_logging;
+    setting_row(
+        ui,
+        "Verbose Logging",
+        "Write per-chunk audio diagnostics to the log",
+        |ui| {
+            ui.checkbox(&mut verbose, "Log pipeline detail");
+        },
+    );
+    if verbose != app.config.verbose_logging {
+        app.config.verbose_logging = verbose;
+        app.save_config();
+        if verbose {
+            tracing::info!("verbose pipeline logging enabled by the operator");
+        }
+    }
+
+    section_header(ui, "SESSION");
+
+    setting_row(ui, "Uptime", "Time since the pipeline was created", |ui| {
+        ui.label(
+            RichText::new(&app.audio_mock.diagnostics.uptime)
+                .size(12.5)
+                .monospace()
+                .color(theme::text_primary()),
+        );
+    });
+
+    setting_row(ui, "Config File", "Where the operator's settings are stored", |ui| {
+        ui.label(
+            RichText::new(crate::paths::config_path().to_string_lossy().to_string())
+                .size(11.0)
+                .monospace()
+                .color(theme::text_secondary()),
+        );
+    });
 }
 
 fn page_bible(ui: &mut Ui, app: &mut HvBibleApp) {

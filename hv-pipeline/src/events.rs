@@ -36,6 +36,10 @@ pub enum PipelineState {
 pub enum PipelineCommand {
     Start,
     Stop,
+    /// Hold the mic open but stop feeding the chain — no metering, no
+    /// recognition. The device stays hot so resuming is instant.
+    Pause,
+    Resume,
     SetGain(f32),
     SetTranslation(String),
     SetDevice(String),
@@ -45,4 +49,10 @@ pub enum PipelineCommand {
     EnableHighPass(bool),
     SetCompressorRatio(f32),
     EnableCompressor(bool),
+    /// Automatic gain control — envelope leveler on the capture stream.
+    EnableAgc(bool),
+    /// Acoustic feedback / echo suppression on the capture stream.
+    EnableAec(bool),
+    /// Voice-activity sensitivity, 0.0 (permissive) .. 1.0 (strict).
+    SetVadSensitivity(f32),
 }

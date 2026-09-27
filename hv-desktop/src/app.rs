@@ -30,6 +30,15 @@ pub struct HvBibleApp {
     pub sermon_log: Vec<SermonLogEntry>,
     pub meter_rms: f32,
     pub meter_peak: f32,
+    /// True while the mic is open but the chain is held. Distinct from
+    /// `is_listening`: the device stays hot, nothing is being recognised.
+    pub is_paused: bool,
+    /// Per-channel peak hold, decayed once per frame. Lives here rather than
+    /// in the meter component because it is a running measurement, not a
+    /// drawing.
+    pub channel_peak_hold: [f32; 2],
+    /// Latched clip flags, cleared by the operator from the Input Level section.
+    pub channel_clip: [bool; 2],
     pub is_listening: bool,
     pub pipeline_state: PipelineState,
     pub led_color: Color32,
@@ -65,6 +74,9 @@ pub struct HvBibleApp {
     pub current_theme: Theme,
     pub theme_preview: Option<crate::theme::ThemePreview>,
     blink_clock: Instant,
+    /// When the previous frame was drawn, so the peak hold can fall at a real
+    /// rate instead of an assumed one.
+    last_frame: Instant,
     pub dark_mode: bool,
 }
 
@@ -97,6 +109,8 @@ impl HvBibleApp {
             vad_sensitivity: config.vad_sensitivity,
             noise_gate_enabled: config.noise_gate_enabled,
             noise_gate_threshold: config.noise_gate_threshold,
+            agc_enabled: config.agc_enabled,
+            aec_enabled: config.aec_enabled,
             hpf_enabled: config.hpf_enabled,
             hpf_frequency: config.hpf_frequency,
             compressor_enabled: config.compressor_enabled,
@@ -144,6 +158,9 @@ impl HvBibleApp {
             sermon_log: Vec::new(),
             meter_rms: -48.0,
             meter_peak: -48.0,
+            is_paused: false,
+            channel_peak_hold: [-48.0, -48.0],
+            channel_clip: [false, false],
             is_listening: false,
             pipeline_state: PipelineState::Stopped,
             led_color: STATUS_ERROR,
@@ -179,6 +196,7 @@ impl HvBibleApp {
             current_theme,
             theme_preview: None,
             blink_clock: Instant::now(),
+            last_frame: Instant::now(),
             dark_mode: config.dark_mode,
         }
     }
@@ -203,20 +221,271 @@ impl HvBibleApp {
     }
 
     pub fn toggle_listening(&mut self) {
-        self.is_listening = !self.is_listening;
         if self.is_listening {
-            self.pipeline
-                .send_command(hv_pipeline::PipelineCommand::Start);
-            self.pipeline_state = PipelineState::Listening;
-            self.last_error = None;
+            self.stop_capture();
         } else {
-            self.pipeline
-                .send_command(hv_pipeline::PipelineCommand::Stop);
-            self.pipeline_state = PipelineState::Stopped;
-            self.meter_rms = -48.0;
-            self.meter_peak = -48.0;
+            self.start_capture();
         }
+    }
+
+    /// Opens the capture device. The mic goes live; the chain starts consuming.
+    pub fn start_capture(&mut self) {
+        if self.is_listening {
+            return;
+        }
+        self.is_listening = true;
+        self.is_paused = false;
+        self.pipeline
+            .send_command(hv_pipeline::PipelineCommand::Start);
+        self.pipeline_state = PipelineState::Listening;
+        self.last_error = None;
         self.refresh_led();
+    }
+
+    /// Holds the chain without closing the device, so resuming costs nothing.
+    pub fn pause_capture(&mut self) {
+        if !self.is_listening || self.is_paused {
+            return;
+        }
+        self.is_paused = true;
+        self.pipeline
+            .send_command(hv_pipeline::PipelineCommand::Pause);
+    }
+
+    /// Releases a pause. No-op when the pipeline was never started.
+    pub fn resume_capture(&mut self) {
+        if !self.is_paused {
+            return;
+        }
+        self.is_paused = false;
+        self.pipeline
+            .send_command(hv_pipeline::PipelineCommand::Resume);
+    }
+
+    /// Flips between paused and running, the way a transport's pause button does.
+    pub fn toggle_pause(&mut self) {
+        if self.is_paused {
+            self.resume_capture();
+        } else if self.is_listening {
+            self.pause_capture();
+        } else {
+            self.start_capture();
+        }
+    }
+
+    /// Closes the capture device and zeroes the meters.
+    pub fn stop_capture(&mut self) {
+        self.is_listening = false;
+        self.is_paused = false;
+        self.pipeline
+            .send_command(hv_pipeline::PipelineCommand::Stop);
+        self.pipeline_state = PipelineState::Stopped;
+        self.meter_rms = -48.0;
+        self.meter_peak = -48.0;
+        self.channel_peak_hold = [-48.0, -48.0];
+        self.refresh_led();
+    }
+
+    /// Re-scans the host for capture devices. Backs the Input Device section's
+    /// refresh button; picks up a device plugged in after launch.
+    pub fn refresh_devices(&mut self) {
+        self.devices = match hv_audio::CpalCapture::list_devices() {
+            Ok(devices) => devices.into_iter().map(|device| device.name).collect(),
+            Err(error) => {
+                tracing::warn!("device refresh failed: {error}");
+                self.last_error = Some(format!("Could not read audio devices: {error}"));
+                return;
+            }
+        };
+        if self.devices.is_empty() {
+            self.devices.push("Default Input".to_string());
+        }
+        if !self.devices.iter().any(|name| *name == self.selected_device) {
+            self.selected_device = self.devices[0].clone();
+        }
+        self.audio_mock.device.name = self.selected_device.clone();
+    }
+
+    /// The host audio API the capture driver reports, for the driver badge.
+    pub fn host_driver(&self) -> &'static str {
+        if cfg!(target_os = "windows") {
+            "WASAPI"
+        } else if cfg!(target_os = "macos") {
+            "CoreAudio"
+        } else if cfg!(target_os = "linux") {
+            "ALSA"
+        } else {
+            "ASIO"
+        }
+    }
+
+    /// Bypasses a capture processor and persists the choice.
+    fn send_processor(&mut self, command: hv_pipeline::PipelineCommand) {
+        self.pipeline.send_command(command);
+        self.save_config();
+    }
+
+    /// Writes the config to disk. Every persisted field goes through here so
+    /// one failure is logged once, in one place.
+    pub fn save_config(&mut self) {
+        if let Err(error) = self.config.save() {
+            tracing::warn!("config save failed: {error}");
+        }
+    }
+
+    pub fn set_hpf_enabled(&mut self, enabled: bool) {
+        self.config.hpf_enabled = enabled;
+        self.send_processor(hv_pipeline::PipelineCommand::EnableHighPass(enabled));
+    }
+
+    pub fn set_compressor_enabled(&mut self, enabled: bool) {
+        self.config.compressor_enabled = enabled;
+        self.send_processor(hv_pipeline::PipelineCommand::EnableCompressor(enabled));
+    }
+
+    /// Low-pass and de-esser are configured per venue and have no live command;
+    /// the operator sets them once in Settings, so persisting is all that is
+    /// needed here.
+    pub fn set_lpf_enabled(&mut self, enabled: bool) {
+        self.config.lpf_enabled = enabled;
+        self.save_config();
+    }
+
+    pub fn set_deesser_enabled(&mut self, enabled: bool) {
+        self.config.deesser_enabled = enabled;
+        self.save_config();
+    }
+
+    pub fn set_agc_enabled(&mut self, enabled: bool) {
+        self.config.agc_enabled = enabled;
+        self.send_processor(hv_pipeline::PipelineCommand::EnableAgc(enabled));
+    }
+
+    pub fn set_aec_enabled(&mut self, enabled: bool) {
+        self.config.aec_enabled = enabled;
+        self.send_processor(hv_pipeline::PipelineCommand::EnableAec(enabled));
+    }
+
+    pub fn set_noise_gate_enabled(&mut self, enabled: bool) {
+        self.config.noise_gate_enabled = enabled;
+        self.send_processor(hv_pipeline::PipelineCommand::EnableNoiseGate(enabled));
+    }
+
+    /// Retunes the live voice-activity detector. No restart needed.
+    pub fn set_vad_sensitivity(&mut self, sensitivity: f32) {
+        let sensitivity = sensitivity.clamp(0.0, 1.0);
+        self.config.vad_sensitivity = sensitivity;
+        self.pipeline
+            .send_command(hv_pipeline::PipelineCommand::SetVadSensitivity(sensitivity));
+        let _ = self.config.save();
+    }
+
+    /// Opens the Settings window on the Audio page — the gear in the pinned bar.
+    pub fn open_audio_settings(&mut self) {
+        self.config.layout_state.settings_tab = crate::panels::settings_window::TAB_AUDIO;
+        self.config.layout_state.settings_open = true;
+    }
+
+    /// Hands the meters to the Input Level section for one frame.
+    ///
+    /// The pipeline reports a single downmixed pair of values, so both channels
+    /// carry the same level. The peak hold is per channel so the two strips
+    /// still fall independently, which is what the operator expects to see.
+    pub fn sample_meters(&mut self) {
+        let level = [self.meter_rms, self.meter_rms];
+        for channel in 0..2 {
+            self.channel_peak_hold[channel] = self.channel_peak_hold[channel]
+                .max(level[channel])
+                .max(self.meter_peak);
+            if self.is_clipping {
+                self.channel_clip[channel] = true;
+            }
+        }
+    }
+
+    /// Lets the peak hold fall at 20 dB per second, the usual PPM behaviour.
+    pub fn decay_peak_hold(&mut self, dt_seconds: f32) {
+        let drop = 20.0 * dt_seconds;
+        for channel in &mut self.channel_peak_hold {
+            *channel = (*channel - drop).max(-48.0);
+        }
+    }
+
+    /// Clears the latched clip indicators. The operator acknowledges the clip
+    /// and the lights go out; without this the dot stays red all service.
+    pub fn clear_clip(&mut self) {
+        self.channel_clip = [false, false];
+    }
+
+    // ── Presets ─────────────────────────────────────────────────────────────
+
+    /// A snapshot of the parameters an operator dials in during setup.
+    pub fn current_preset(&self, name: &str) -> crate::config::SavedPreset {
+        crate::config::SavedPreset {
+            name: name.to_string(),
+            gain_db: self.gain_db(),
+            agc_enabled: self.config.agc_enabled,
+            aec_enabled: self.config.aec_enabled,
+            noise_gate_enabled: self.config.noise_gate_enabled,
+            vad_sensitivity: self.config.vad_sensitivity,
+            led_hardware: self.audio_mock.led.hardware_enabled,
+            led_screen: self.audio_mock.led.screen_enabled,
+        }
+    }
+
+    /// Stores the live console under `name`, replacing any preset with that name.
+    pub fn save_preset(&mut self, name: &str) {
+        let preset = self.current_preset(name);
+        match self
+            .config
+            .saved_presets
+            .iter_mut()
+            .find(|stored| stored.name == name)
+        {
+            Some(existing) => *existing = preset,
+            None => self.config.saved_presets.push(preset),
+        }
+        self.config.preset_name = name.to_string();
+        self.save_config();
+    }
+
+    pub fn delete_preset(&mut self, name: &str) {
+        self.config.saved_presets.retain(|stored| stored.name != name);
+        self.save_config();
+    }
+
+    /// Names of the presets the operator has actually saved, for the pickers.
+    pub fn stored_preset_names(&self) -> Vec<String> {
+        self.config
+            .saved_presets
+            .iter()
+            .map(|preset| preset.name.clone())
+            .collect()
+    }
+
+    /// Applies a stored preset: writes the config, then tells the pipeline about
+    /// every value it owns. Toggling a bypass is only useful if the chain
+    /// actually changes, so the commands go out here rather than on save.
+    pub fn apply_preset(&mut self, name: &str) {
+        let Some(preset) = self
+            .config
+            .saved_presets
+            .iter()
+            .find(|stored| stored.name == name)
+            .cloned()
+        else {
+            return;
+        };
+
+        self.set_gain_db(preset.gain_db);
+        self.set_agc_enabled(preset.agc_enabled);
+        self.set_aec_enabled(preset.aec_enabled);
+        self.set_noise_gate_enabled(preset.noise_gate_enabled);
+        self.set_vad_sensitivity(preset.vad_sensitivity);
+        self.audio_mock.led.hardware_enabled = preset.led_hardware;
+        self.audio_mock.led.screen_enabled = preset.led_screen;
+        self.config.preset_name = name.to_string();
+        self.save_config();
     }
 
     pub fn approve_current(&mut self) {
@@ -313,6 +582,9 @@ impl HvBibleApp {
     }
 
     pub fn status_label(&self) -> &'static str {
+        if self.is_paused {
+            return "PAUSED";
+        }
         match self.pipeline_state {
             PipelineState::Stopped => "STANDBY",
             PipelineState::Listening => "LISTENING",
@@ -322,6 +594,9 @@ impl HvBibleApp {
     }
 
     pub fn vad_label(&self) -> &'static str {
+        if self.is_paused {
+            return "Paused";
+        }
         match self.pipeline_state {
             PipelineState::Speaking => "Speaking",
             PipelineState::Silence => "Silence",
@@ -415,7 +690,14 @@ impl HvBibleApp {
     }
 
     fn sync_mock_state(&mut self) {
+        let now = Instant::now();
+        let dt = now.duration_since(self.last_frame).as_secs_f32().min(0.5);
+        self.last_frame = now;
+        self.decay_peak_hold(dt);
+        self.sample_meters();
+
         self.audio_mock.device.name = self.selected_device.clone();
+        self.audio_mock.device.driver = self.host_driver().to_string();
         self.audio_mock.level.left_db = self.meter_rms;
         self.audio_mock.level.right_db = self.meter_rms;
         self.audio_mock.level.peak_db = self.meter_peak;
@@ -423,6 +705,7 @@ impl HvBibleApp {
         self.audio_mock.level.snr_db = self.snr_db;
         self.audio_mock.vad.status = self.vad_label().to_string();
         self.audio_mock.vad.confidence = self.asr_confidence.max(0.90);
+        self.audio_mock.vad.sensitivity = self.config.vad_sensitivity;
         self.audio_mock.gain.input_gain_db = self.gain_db();
         self.audio_mock.led.status = self.status_label().to_string();
     }

@@ -18,6 +18,42 @@ pub struct LayoutState {
     pub settings_open: bool,
     #[serde(default)]
     pub settings_tab: usize,
+    /// Open/closed state for every section in the left audio column, so the
+    /// operator's arrangement survives a restart. Persisted because it is a
+    /// workspace preference, not a transient view state.
+    #[serde(default)]
+    pub audio_sections: AudioSections,
+}
+
+/// Disclosure state for the left column's six sections.
+///
+/// The operator sets up a console the way they like it and expects to find it
+/// that way on Sunday morning, exactly like a mix window. `Copy` because the
+/// column mirrors it into locals each frame and writes it back.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase", default)]
+pub struct AudioSections {
+    pub input_device: bool,
+    pub input_level: bool,
+    pub gain: bool,
+    pub voice: bool,
+    pub preset: bool,
+    pub led: bool,
+}
+
+impl Default for AudioSections {
+    /// The two things an operator checks mid-service start open: which input is
+    /// live, and how hot it is running. The rest are deliberate.
+    fn default() -> Self {
+        Self {
+            input_device: true,
+            input_level: true,
+            gain: false,
+            voice: false,
+            preset: false,
+            led: false,
+        }
+    }
 }
 
 impl Default for LayoutState {
@@ -32,6 +68,7 @@ impl Default for LayoutState {
             ribbon_collapsed: false,
             settings_open: false,
             settings_tab: 0,
+            audio_sections: AudioSections::default(),
         }
     }
 }

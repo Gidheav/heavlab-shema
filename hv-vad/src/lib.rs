@@ -39,6 +39,21 @@ pub struct VadConfig {
     pub min_speech_ms: u64,
 }
 
+impl VadConfig {
+    /// RMS energy threshold for a 0.0–1.0 sensitivity.
+    ///
+    /// Swept geometrically so the mid-point lands exactly on the 1000.0 default
+    /// and the response feels even across the slider in decibels, not in
+    /// amplitude. 0.0 is permissive enough to catch a soft preacher; 1.0 is
+    /// strict enough to ignore room tone.
+    pub fn energy_threshold_for(sensitivity: f32) -> f64 {
+        const MOST_PERMISSIVE: f64 = 250.0;
+        const MOST_STRICT: f64 = 4_000.0;
+        let sweep = sensitivity.clamp(0.0, 1.0) as f64;
+        MOST_PERMISSIVE * (MOST_STRICT / MOST_PERMISSIVE).powf(sweep)
+    }
+}
+
 impl Default for VadConfig {
     fn default() -> Self {
         Self {
@@ -54,4 +69,9 @@ pub trait Vad: Send + 'static {
     fn process(&mut self, chunk: &AudioChunk) -> VadState;
     fn reset(&mut self);
     fn config(&self) -> &VadConfig;
+    /// Retune the detector live, 0.0 (permissive) .. 1.0 (strict).
+    ///
+    /// Defaults to a no-op so a detector with no notion of a continuous
+    /// sensitivity knob keeps compiling; only the UI slider depends on it.
+    fn set_sensitivity(&mut self, _sensitivity: f32) {}
 }

@@ -2,6 +2,9 @@
 
 use crate::AudioChunk;
 
+/// Every processor in this module runs on the pipeline's 16 kHz mono stream.
+const SAMPLE_RATE: f32 = 16_000.0;
+
 pub struct NoiseGate {
     pub threshold: f32,
     pub attack_ms: f32,

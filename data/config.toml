@@ -1,8 +1,8 @@
 audio_device = "Microphone Array (Realtek(R) Audio)"
 gain = 0.10000000149011612
 translation = "NIV"
-window_width = 159.1999969482422
-window_height = 27.200000762939453
+window_width = 1536.0
+window_height = 816.0
 dark_mode = true
 asr_mode = "sherpa"
 asr_model_size = "medium"
@@ -10,11 +10,35 @@ asr_model_id = "sherpa-zipformer-en"
 vad_mode = "hybrid"
 vad_sensitivity = 0.5
 noise_gate_enabled = false
-noise_gate_threshold = 0.004999999888241291
-hpf_enabled = false
+noise_gate_threshold = 0.0005000000237487257
+hpf_enabled = true
 hpf_frequency = 80.0
-compressor_enabled = false
+compressor_enabled = true
 compressor_ratio = 4.0
+agc_enabled = false
+aec_enabled = false
+agc_target_db = -18.0
+agc_max_gain_db = 20.0
+lpf_enabled = true
+lpf_frequency = 8000.0
+deesser_enabled = true
+deesser_frequency = 6000.0
+monitor_output_device = "System Default"
+monitor_volume_db = 0.0
+headphone_output_device = "System Default"
+headphone_volume_db = 0.0
+recording_format = "WAV 24-bit"
+recording_auto = false
+preset_name = "Church Service"
+default_preset_name = "Church Service"
+saved_presets = []
+capture_sample_rate = "48 kHz"
+capture_bit_depth = "24-bit"
+capture_buffer_size = "256"
+diagnostics_interval_ms = 1100
+experimental_features = false
+debug_overlay = false
+verbose_logging = false
 use_gpu = false
 num_threads = 0
 hotwords_enabled = false
@@ -25,14 +49,22 @@ theme_mode = ""
 
 [layoutState]
 leftCollapsed = false
-leftWidth = 200.0
+leftWidth = 614.4000244140625
 rightCollapsed = false
 rightWidth = 200.0
 middleBottomCollapsed = false
 middleBottomHeight = 80.0
 ribbonCollapsed = false
 settingsOpen = false
-settingsTab = 1
+settingsTab = 8
+
+[layoutState.audioSections]
+inputDevice = true
+inputLevel = true
+gain = false
+voice = false
+preset = false
+led = false
 
 [font_config]
 family = "Roboto"

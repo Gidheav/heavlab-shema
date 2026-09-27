@@ -24,6 +24,8 @@ pub struct PipelineConfig {
     pub vad_sensitivity: f32,
     pub noise_gate_enabled: bool,
     pub noise_gate_threshold: f32,
+    pub agc_enabled: bool,
+    pub aec_enabled: bool,
     pub hpf_enabled: bool,
     pub hpf_frequency: f32,
     pub compressor_enabled: bool,
@@ -55,6 +57,8 @@ impl Default for PipelineConfig {
             vad_sensitivity: 0.5,
             noise_gate_enabled: false,
             noise_gate_threshold: 0.005,
+            agc_enabled: false,
+            aec_enabled: false,
             hpf_enabled: false,
             hpf_frequency: 80.0,
             compressor_enabled: false,
@@ -78,13 +82,10 @@ pub fn create_pipeline(
         Box::new(CpalCapture::new())
     };
 
-    // Set up VAD
+    // Set up VAD. The sensitivity→threshold curve lives in `hv_vad` so the
+    // live slider in the left column and this startup path cannot disagree.
     let mut vad_config = VadConfig::default();
-    vad_config.energy_threshold = match config.vad_sensitivity {
-        s if s < 0.3 => 1500.0,
-        s if s > 0.7 => 500.0,
-        _ => 1000.0,
-    };
+    vad_config.energy_threshold = VadConfig::energy_threshold_for(config.vad_sensitivity);
     let vad: Box<dyn hv_vad::Vad> = Box::new(EnergyVad::new(vad_config));
 
     // Set up ASR engine

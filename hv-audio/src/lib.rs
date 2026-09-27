@@ -5,6 +5,7 @@
 pub mod capture;
 #[cfg(feature = "desktop")]
 pub mod capture_cpal;
+pub mod feedback;
 pub mod meter;
 pub mod ring;
 pub mod dsp;
@@ -18,3 +19,4 @@ pub use capture_cpal::CpalCapture;
 pub use meter::{AudioMeter, MeterReading};
 pub use ring::AudioRing;
 pub use dsp::{NoiseGate, HighPassFilter, Compressor};
+pub use feedback::{Aec, Agc};

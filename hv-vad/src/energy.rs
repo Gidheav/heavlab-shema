@@ -95,6 +95,10 @@ impl Vad for EnergyVad {
     fn config(&self) -> &VadConfig {
         &self.config
     }
+
+    fn set_sensitivity(&mut self, sensitivity: f32) {
+        self.config.energy_threshold = VadConfig::energy_threshold_for(sensitivity);
+    }
 }
 
 #[cfg(test)]
